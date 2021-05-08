@@ -1,0 +1,6 @@
+
+enum Term {
+	ABSTRACTION,
+	APPLICATION
+}
+

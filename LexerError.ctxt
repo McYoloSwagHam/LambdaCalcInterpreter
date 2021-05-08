@@ -1,0 +1,5 @@
+#BlueJ class context
+comment0.target=LexerError
+comment1.params=errorMessage
+comment1.target=LexerError(java.lang.String)
+numComments=2
