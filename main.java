@@ -19,8 +19,9 @@ public class main
 
 				//Our sample lambda calculus equivalent to 1+2
 				//String additionTest = "(a ((\\f.\\x.(f x ))(\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))))";
-				String additionTest = "(a ((\\b.\\c.(b (b c)(b c)))))";
-				//String additionTest = "(a ((\\b.\\c.(b (\\f.\\x.(f x)) b c))))";
+                //String additionTest = "(a ((\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))))";
+				//String additionTest = "(a ((\\b.\\c.(b (b c)(b c)))))";
+				String additionTest = "(a ((\\b.\\c.(b (\\f.\\x.(f (f x))) b c))))";
 				//String additionTest = "(\\x.(x (x (\\y.(y)) (c b))))";
 				//String additionTest = "((\\x.(\\x.(x x))))";
 				//String additionTest = "(\\x.(\\x.(x x)))";
@@ -28,6 +29,8 @@ public class main
 				try {
 						LexicalParser lexer = new LexicalParser(additionTest);
 						System.out.println(ASTFormatter.FormatAST(lexer.rootNode));
+                        Evaluator eval = new Evaluator(lexer.rootNode);
+						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(0)));
 				} catch (Exception err) {
 						System.out.println("line num : " + err.getStackTrace()[0].getLineNumber());
 						System.out.println(err);

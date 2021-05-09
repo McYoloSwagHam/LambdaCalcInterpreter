@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.ArrayList;
+import java.util.*;
 
 /*
  * The Abstract Syntax Tree will not be a binary tree of Operations
@@ -32,12 +31,88 @@ public class ASTNode {
 
     public ASTNode parent;
     public ArrayList<ASTNode> child;
-    public NodeType type;
 		public int lexicalDepth;
     public FunctionType functionType;
 
 		public boolean hasChildren() {
 			return child.size() != 0;
+		}
+
+    public ASTNode CloneSubTree(ASTNode sourceNode) {
+
+      ASTNode newNode = this;
+      
+      ASTNode.CloneNode(sourceNode, newNode);
+
+      Stack<Integer> indexTracker = new Stack<Integer> indexTracker();
+      int currentIndex;
+
+      //copy tree structure
+			while (true) {
+
+				// go up or exit
+				if (!newNode.hasChildren() || currentIndex == newNode.child.size()) { 
+					// exit
+					if (indexTracker.empty()) {
+						break;
+					}
+
+					// Shouldn't happen because by the time 
+					// we make it up to the rootNode indexTracker should be empty
+					if (newNode.parent == null) {
+						//TODO: Handle this too
+					}
+
+					newNode = newNode.parent;
+					currentIndex = indexTracker.pop();
+
+					//newNode = newNode.parent;
+
+					//assert newNode != null : "newNode parent null how?";
+
+				} else {
+
+					// if we haven't found are first abstraction, it's definitely gonna be 
+					// part of the tree.
+					newNode = new ASTNode(newNode);
+					sourceNode =  sourceNode.get(currentIndex);
+
+					if (currentNode == null) {
+						//TODO: Handle.
+					}
+
+					indexTracker.push(++currentIndex);
+
+          ASTNode.cloneNode(sourceNode, newNode);
+
+				}
+      }
+
+      return newNode;
+
+    }
+
+		public static void CloneNode(ASTNode sourceNode, ASTNode targetNode) {
+      targetNode.functionType = sourceNode.functionType;
+      targetNode.lexicalDepth = sourceNode.lexicalDepth;
+
+      switch (sourceNode.functionType) {
+        case NONE:
+          break;
+        case NESTED_FUNCTION:
+          //copy over locals
+          // yes I know that it already had an empty initialized
+          // array, but I also have no idea whether this is better
+          targetNode.locals = new ArrayList<Character>(sourceNode.locals);
+        case FUNCTION_CALL:
+          targetNode.functionCalls = new ArrayList<Character>(sourceNode.functionCalls);
+        default:
+          //unreachable
+          break;
+
+      }
+
+
 		}
 
 		public ASTNode(ASTNode nodeParent) {
@@ -51,7 +126,6 @@ public class ASTNode {
             child = new ArrayList<ASTNode>();
 
 		}
-
 
     public ASTNode() {
 
