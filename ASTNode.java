@@ -41,17 +41,16 @@ public class ASTNode {
     public ASTNode CloneSubTree(ASTNode sourceNode) {
 
       ASTNode newNode = this;
-      
       ASTNode.CloneNode(sourceNode, newNode);
 
-      Stack<Integer> indexTracker = new Stack<Integer> indexTracker();
-      int currentIndex;
+      Stack<Integer> indexTracker = new Stack<Integer>();
+      int currentIndex = 0;
 
       //copy tree structure
 			while (true) {
 
 				// go up or exit
-				if (!newNode.hasChildren() || currentIndex == newNode.child.size()) { 
+				if (!sourceNode.hasChildren() || currentIndex == sourceNode.child.size()) { 
 					// exit
 					if (indexTracker.empty()) {
 						break;
@@ -59,11 +58,12 @@ public class ASTNode {
 
 					// Shouldn't happen because by the time 
 					// we make it up to the rootNode indexTracker should be empty
-					if (newNode.parent == null) {
+					if (sourceNode.parent == null) {
 						//TODO: Handle this too
 					}
 
 					newNode = newNode.parent;
+					sourceNode = sourceNode.parent;
 					currentIndex = indexTracker.pop();
 
 					//newNode = newNode.parent;
@@ -75,20 +75,19 @@ public class ASTNode {
 					// if we haven't found are first abstraction, it's definitely gonna be 
 					// part of the tree.
 					newNode = new ASTNode(newNode);
-					sourceNode =  sourceNode.get(currentIndex);
-
-					if (currentNode == null) {
+					sourceNode =  sourceNode.child.get(currentIndex);
+					if (sourceNode == null) {
 						//TODO: Handle.
 					}
 
 					indexTracker.push(++currentIndex);
-
-          ASTNode.cloneNode(sourceNode, newNode);
+          currentIndex = 0;
+          ASTNode.CloneNode(sourceNode, newNode);
 
 				}
       }
 
-      return newNode;
+      return this;
 
     }
 
@@ -122,7 +121,7 @@ public class ASTNode {
             //NodeType = FunctionType.NONE;
 						functionType = FunctionType.NONE;
             parent = nodeParent;
-						parent.child.add(this);
+            parent.child.add(this);
             child = new ArrayList<ASTNode>();
 
 		}

@@ -55,7 +55,7 @@ public class ASTFormatter {
 
 
 
-	private static String FormatNode(ASTNode node) {
+	public static String FormatNode(ASTNode node) {
 
 		String finalString = "";
 		String functionType = FormatFunctionType(node.functionType);

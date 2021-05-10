@@ -26,15 +26,20 @@ public class main
 				//String additionTest = "((\\x.(\\x.(x x))))";
 				//String additionTest = "(\\x.(\\x.(x x)))";
 
+
 				try {
 						LexicalParser lexer = new LexicalParser(additionTest);
 						System.out.println(ASTFormatter.FormatAST(lexer.rootNode));
                         Evaluator eval = new Evaluator(lexer.rootNode);
-						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(0)));
+						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(1)));
+                        eval = new Evaluator(eval.ASTs.get(1));
+						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(1)));
+                        eval = new Evaluator(eval.ASTs.get(1));
+						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(1)));
 				} catch (Exception err) {
-						System.out.println("line num : " + err.getStackTrace()[0].getLineNumber());
-						System.out.println(err);
+                    err.printStackTrace();
 				}
+
 
 
     }
