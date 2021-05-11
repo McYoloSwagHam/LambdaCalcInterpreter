@@ -1,0 +1,18 @@
+#BlueJ class context
+comment0.target=ASTNode
+comment0.text=\r\n\ The\ Abstract\ Syntax\ Tree\ will\ not\ be\ a\ binary\ tree\ of\ Operations\r\n\ instead\ it\ will\ take\ the\ form\ of\ a\ linked-list\ relating\ statements\ on\ the\ same\ level\r\n\ and\ allowing\ for\ tree-like\ branching\ when\ dropping\ into\ an\ expression\r\n\ this\ allows\ us\ to\ evaluate\ expressions\ on\ the\ same\ level\ with\ much\ more\ easy\ \r\n\ by\ just\ iterating\ over\ the\ horizontal\ linked-list\ instead\ of\ having\ to\ traverse\ a\ binary\r\n\ tree\ and\ figure\ out\ where\ the\ last\ expression\ ended\r\n\r\n\ E.G\r\n\r\n\ \ Function1\ -\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Function2\ -\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Function3\r\n\ \ \ \ |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\r\n\ \ \ \ |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ....\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ....\r\n\ \ locals\ -\ function-body\r\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\r\n\ \ \ \ \ \ \ \ \ \ \ expression/Nested\ function\r\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\r\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ locals\ \ -\ function-body\ \r\n\r\n\r\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ etc.....\r\n
+comment1.params=hash\ info
+comment1.target=int\ RollingHash(int,\ int)
+comment2.params=rootNode
+comment2.target=int\ HashAST(ASTNode)
+comment3.params=
+comment3.target=boolean\ hasChildren()
+comment4.params=sourceNode
+comment4.target=ASTNode\ CloneSubTree(ASTNode)
+comment5.params=sourceNode\ targetNode
+comment5.target=void\ CloneNode(ASTNode,\ ASTNode)
+comment6.params=nodeParent
+comment6.target=ASTNode(ASTNode)
+comment7.params=
+comment7.target=ASTNode()
+numComments=8

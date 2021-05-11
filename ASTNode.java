@@ -21,201 +21,196 @@ import java.util.*;
  *
  *
  *                                       etc.....
-*/                                
+*/
 
 public class ASTNode {
 
-    //current locals of the node.
-    public ArrayList<Character> locals;
-    public ArrayList<Character> functionCalls;
-	public static final int PRIME_BASE = 65537;
-    public ASTNode parent;
-    public ArrayList<ASTNode> child;
-	public int lexicalDepth;
-    public FunctionType functionType;
+  // current locals of the node.
+  public ArrayList<Character> locals;
+  public ArrayList<Character> functionCalls;
+  public static final int PRIME_BASE = 65537;
+  public ASTNode parent;
+  public ArrayList<ASTNode> child;
+  public int lexicalDepth;
+  public FunctionType functionType;
 
-	// This is a dumb rolling hash for just making checksumming
-	// AST trees to realize that they're no longer reduceable
-	public static int RollingHash(int hash, int info) {
-		hash *= PRIME_BASE;
-		hash ^= info;
-		hash += info % 2;
-		return hash;
-	}
+  // This is a dumb rolling hash for just making checksumming
+  // AST trees to realize that they're no longer reduceable
+  public static int RollingHash(int hash, int info) {
+    hash *= PRIME_BASE;
+    hash ^= info;
+    hash += info % 2;
+    return hash;
+  }
 
+  public static int HashAST(ASTNode rootNode) {
 
-	public static int HashAST(ASTNode rootNode) {
+    ASTNode currentNode = rootNode;
 
-		ASTNode currentNode = rootNode;
+    Stack<Integer> indexTracker = new Stack<Integer>();
+    int currentIndex = 0;
+    int rollingHash = 0;
 
-		Stack<Integer> indexTracker = new Stack<Integer>();
-		int currentIndex = 0;
-		int rollingHash = 0;
+    while (true) {
 
-		while (true) {
+      // go up or exit
+      if (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) {
+        // exit
+        if (indexTracker.empty()) {
+          break;
+        }
 
-			// go up or exit
-			if (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) { 
-				// exit
-				if (indexTracker.empty()) {
-					break;
-				}
+        // Shouldn't happen because by the time
+        // we make it up to the rootNode indexTracker should be empty
+        if (currentNode.parent == null) {
+          // TODO: Handle this too
+        }
 
-				// Shouldn't happen because by the time 
-				// we make it up to the rootNode indexTracker should be empty
-				if (currentNode.parent == null) {
-					//TODO: Handle this too
-				}
+        // newNode = newNode.parent;
+        currentNode = currentNode.parent;
+        currentIndex = indexTracker.pop();
 
-				//newNode = newNode.parent;
-				currentNode = currentNode.parent;
-				currentIndex = indexTracker.pop();
+        continue;
 
-				continue;
+      } else {
 
-			} else {
+        currentNode = currentNode.child.get(currentIndex);
 
-				currentNode =  currentNode.child.get(currentIndex);
+        // callback here
 
-				//callback here 
+        indexTracker.push(++currentIndex);
+        currentIndex = 0;
 
-				indexTracker.push(++currentIndex);
-				currentIndex = 0;
+        if (currentNode == null) {
+          // TODO: Handle.
+        }
 
-				if (currentNode == null) {
-					//TODO: Handle.
-				}
+        switch (currentNode.functionType) {
+          case FUNCTION_CALL:
+            for (char call : currentNode.functionCalls) {
 
-				switch (currentNode.functionType)  {
-					case FUNCTION_CALL:
-						for (char call : currentNode.functionCalls) {
+              // cast character to ascii integer
+              rollingHash = RollingHash(rollingHash, call - 0);
+            }
 
-							// cast character to ascii integer
-							rollingHash = RollingHash(rollingHash, call - 0);
-						}
+            break;
+          case NESTED_FUNCTION:
+            for (char local : currentNode.locals) {
 
+              // cast character to ascii integer
+              rollingHash = RollingHash(rollingHash, local - 0);
+            }
 
-						break;
-					case NESTED_FUNCTION:
-						for (char local : currentNode.locals) {
+        }
 
-							// cast character to ascii integer
-							rollingHash = RollingHash(rollingHash, local - 0);
-						}
+        rollingHash = RollingHash(rollingHash, currentNode.child.size());
 
-
-				}
-
-				rollingHash = RollingHash(rollingHash, currentNode.child.size());
-
-			}
-		}
-
-		return rollingHash;
-
-	}
-
-
-	public boolean hasChildren() {
-		return child.size() != 0;
-	}
-
-    public ASTNode CloneSubTree(ASTNode sourceNode) {
-
-      ASTNode newNode = this;
-      ASTNode.CloneNode(sourceNode, newNode);
-
-      Stack<Integer> indexTracker = new Stack<Integer>();
-      int currentIndex = 0;
-
-      //copy tree structure
-			while (true) {
-
-				// go up or exit
-				if (!sourceNode.hasChildren() || currentIndex == sourceNode.child.size()) { 
-					// exit
-					if (indexTracker.empty()) {
-						break;
-					}
-
-					// Shouldn't happen because by the time 
-					// we make it up to the rootNode indexTracker should be empty
-					if (sourceNode.parent == null) {
-						//TODO: Handle this too
-					}
-
-					newNode = newNode.parent;
-					sourceNode = sourceNode.parent;
-					currentIndex = indexTracker.pop();
-
-					//newNode = newNode.parent;
-
-					//assert newNode != null : "newNode parent null how?";
-
-				} else {
-
-					// if we haven't found are first abstraction, it's definitely gonna be 
-					// part of the tree.
-					newNode = new ASTNode(newNode);
-					sourceNode =  sourceNode.child.get(currentIndex);
-					if (sourceNode == null) {
-						//TODO: Handle.
-					}
-
-					indexTracker.push(++currentIndex);
-          currentIndex = 0;
-          ASTNode.CloneNode(sourceNode, newNode);
-
-				}
       }
+    }
 
-      return this;
+    return rollingHash;
+
+  }
+
+  public boolean hasChildren() {
+    return child.size() != 0;
+  }
+
+  public ASTNode CloneSubTree(ASTNode sourceNode) {
+
+    ASTNode newNode = this;
+    ASTNode.CloneNode(sourceNode, newNode);
+
+    Stack<Integer> indexTracker = new Stack<Integer>();
+    int currentIndex = 0;
+
+    // copy tree structure
+    while (true) {
+
+      // go up or exit
+      if (!sourceNode.hasChildren() || currentIndex == sourceNode.child.size()) {
+        // exit
+        if (indexTracker.empty()) {
+          break;
+        }
+
+        // Shouldn't happen because by the time
+        // we make it up to the rootNode indexTracker should be empty
+        if (sourceNode.parent == null) {
+          // TODO: Handle this too
+        }
+
+        newNode = newNode.parent;
+        sourceNode = sourceNode.parent;
+        currentIndex = indexTracker.pop();
+
+        // newNode = newNode.parent;
+
+        // assert newNode != null : "newNode parent null how?";
+
+      } else {
+
+        // if we haven't found are first abstraction, it's definitely gonna be
+        // part of the tree.
+        newNode = new ASTNode(newNode);
+        sourceNode = sourceNode.child.get(currentIndex);
+        if (sourceNode == null) {
+          // TODO: Handle.
+        }
+
+        indexTracker.push(++currentIndex);
+        currentIndex = 0;
+        ASTNode.CloneNode(sourceNode, newNode);
+
+      }
+    }
+
+    return this;
+
+  }
+
+  public static void CloneNode(ASTNode sourceNode, ASTNode targetNode) {
+    targetNode.functionType = sourceNode.functionType;
+    targetNode.lexicalDepth = sourceNode.lexicalDepth;
+
+    switch (sourceNode.functionType) {
+      case NONE:
+        break;
+      case NESTED_FUNCTION:
+        // copy over locals
+        // yes I know that it already had an empty initialized
+        // array, but I also have no idea whether this is better
+        targetNode.locals = new ArrayList<Character>(sourceNode.locals);
+      case FUNCTION_CALL:
+        targetNode.functionCalls = new ArrayList<Character>(sourceNode.functionCalls);
+      default:
+        // unreachable
+        break;
 
     }
 
-		public static void CloneNode(ASTNode sourceNode, ASTNode targetNode) {
-      targetNode.functionType = sourceNode.functionType;
-      targetNode.lexicalDepth = sourceNode.lexicalDepth;
+  }
 
-      switch (sourceNode.functionType) {
-        case NONE:
-          break;
-        case NESTED_FUNCTION:
-          //copy over locals
-          // yes I know that it already had an empty initialized
-          // array, but I also have no idea whether this is better
-          targetNode.locals = new ArrayList<Character>(sourceNode.locals);
-        case FUNCTION_CALL:
-          targetNode.functionCalls = new ArrayList<Character>(sourceNode.functionCalls);
-        default:
-          //unreachable
-          break;
+  public ASTNode(ASTNode nodeParent) {
 
-      }
+    locals = new ArrayList<Character>();
+    functionCalls = new ArrayList<Character>();
+    // NodeType = FunctionType.NONE;
+    functionType = FunctionType.NONE;
+    parent = nodeParent;
+    parent.child.add(this);
+    child = new ArrayList<ASTNode>();
 
+  }
 
-		}
+  public ASTNode() {
 
-		public ASTNode(ASTNode nodeParent) {
+    locals = new ArrayList<Character>();
+    functionCalls = new ArrayList<Character>();
+    // NodeType = FunctionType.NONE;
+    functionType = FunctionType.NONE;
+    parent = null;
+    child = new ArrayList<ASTNode>();
 
-            locals = new ArrayList<Character>();
-            functionCalls = new ArrayList<Character>();
-            //NodeType = FunctionType.NONE;
-						functionType = FunctionType.NONE;
-            parent = nodeParent;
-            parent.child.add(this);
-            child = new ArrayList<ASTNode>();
-
-		}
-
-    public ASTNode() {
-
-            locals = new ArrayList<Character>();
-            functionCalls = new ArrayList<Character>();
-            //NodeType = FunctionType.NONE;
-						functionType = FunctionType.NONE;
-            parent = null;
-            child = new ArrayList<ASTNode>();
-
-    }
+  }
 }

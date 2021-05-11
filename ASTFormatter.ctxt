@@ -1,0 +1,13 @@
+#BlueJ class context
+comment0.target=ASTFormatter
+comment1.params=funcType
+comment1.target=java.lang.String\ FormatFunctionType(FunctionType)
+comment2.params=vec
+comment2.target=java.lang.String\ CharArrayToString(java.util.ArrayList)
+comment3.params=node
+comment3.target=java.lang.String\ FormatNodeInformation(ASTNode)
+comment4.params=node
+comment4.target=java.lang.String\ FormatNode(ASTNode)
+comment5.params=rootNode
+comment5.target=java.lang.String\ FormatAST(ASTNode)
+numComments=6
