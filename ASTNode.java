@@ -28,15 +28,97 @@ public class ASTNode {
     //current locals of the node.
     public ArrayList<Character> locals;
     public ArrayList<Character> functionCalls;
-
+	public static final int PRIME_BASE = 65537;
     public ASTNode parent;
     public ArrayList<ASTNode> child;
-		public int lexicalDepth;
+	public int lexicalDepth;
     public FunctionType functionType;
 
-		public boolean hasChildren() {
-			return child.size() != 0;
+	// This is a dumb rolling hash for just making checksumming
+	// AST trees to realize that they're no longer reduceable
+	public static int RollingHash(int hash, int info) {
+		hash *= PRIME_BASE;
+		hash ^= info;
+		hash += info % 2;
+		return hash;
+	}
+
+
+	public static int HashAST(ASTNode rootNode) {
+
+		ASTNode currentNode = rootNode;
+
+		Stack<Integer> indexTracker = new Stack<Integer>();
+		int currentIndex = 0;
+		int rollingHash = 0;
+
+		while (true) {
+
+			// go up or exit
+			if (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) { 
+				// exit
+				if (indexTracker.empty()) {
+					break;
+				}
+
+				// Shouldn't happen because by the time 
+				// we make it up to the rootNode indexTracker should be empty
+				if (currentNode.parent == null) {
+					//TODO: Handle this too
+				}
+
+				//newNode = newNode.parent;
+				currentNode = currentNode.parent;
+				currentIndex = indexTracker.pop();
+
+				continue;
+
+			} else {
+
+				currentNode =  currentNode.child.get(currentIndex);
+
+				//callback here 
+
+				indexTracker.push(++currentIndex);
+				currentIndex = 0;
+
+				if (currentNode == null) {
+					//TODO: Handle.
+				}
+
+				switch (currentNode.functionType)  {
+					case FUNCTION_CALL:
+						for (char call : currentNode.functionCalls) {
+
+							// cast character to ascii integer
+							rollingHash = RollingHash(rollingHash, call - 0);
+						}
+
+
+						break;
+					case NESTED_FUNCTION:
+						for (char local : currentNode.locals) {
+
+							// cast character to ascii integer
+							rollingHash = RollingHash(rollingHash, local - 0);
+						}
+
+
+				}
+
+				rollingHash = RollingHash(rollingHash, currentNode.child.size());
+
+			}
 		}
+
+		return rollingHash;
+
+	}
+
+
+	public boolean hasChildren() {
+		return child.size() != 0;
+	}
 
     public ASTNode CloneSubTree(ASTNode sourceNode) {
 

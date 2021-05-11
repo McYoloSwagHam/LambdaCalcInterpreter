@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 /**
  * Write a description of class main here.
@@ -19,6 +20,7 @@ public class main
 
 				//Our sample lambda calculus equivalent to 1+2
 				//String additionTest = "(a ((\\f.\\x.(f x ))(\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))))";
+				//String additionTest = "((\\x.(x x))(\\x.(x x))";
                 //String additionTest = "(a ((\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))))";
 				//String additionTest = "(a ((\\b.\\c.(b (b c)(b c)))))";
 				String additionTest = "(a ((\\b.\\c.(b (\\f.\\x.(f (f x))) b c))))";
@@ -28,14 +30,24 @@ public class main
 
 
 				try {
-						LexicalParser lexer = new LexicalParser(additionTest);
-						System.out.println(ASTFormatter.FormatAST(lexer.rootNode));
-                        Evaluator eval = new Evaluator(lexer.rootNode);
-						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(1)));
-                        eval = new Evaluator(eval.ASTs.get(1));
-						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(1)));
-                        eval = new Evaluator(eval.ASTs.get(1));
-						System.out.println(ASTFormatter.FormatAST(eval.ASTs.get(1)));
+					LexicalParser lexer = new LexicalParser(additionTest);
+					Evaluator eval = new Evaluator(lexer.rootNode);
+					ASTNode reduced = lexer.rootNode;
+
+					ArrayList<Integer> ASTHashes = new ArrayList<Integer>();
+
+					int lastHash = 0;
+					int currentHash = 1;
+
+					while (currentHash != lastHash) {
+						lastHash = currentHash;
+						reduced = eval.Evaluate(reduced);
+						currentHash = ASTNode.HashAST(reduced);
+						System.out.println(ASTFormatter.FormatAST(reduced));
+					}
+
+					System.out.println("Final Reduction!");
+
 				} catch (Exception err) {
                     err.printStackTrace();
 				}

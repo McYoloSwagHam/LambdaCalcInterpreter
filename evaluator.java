@@ -281,9 +281,6 @@ public class Evaluator
 				ASTNode leaf = reducableBranches.get(leafIndex);
 				ASTNode replacePoint = replacePoints.get(leafIndex);
 
-				System.out.println("leaf : " + ASTFormatter.FormatNode(leaf));
-				
-
 				//should never happen, literally
 				if (leaf.parent == null) {
 					continue;
@@ -400,15 +397,18 @@ public class Evaluator
 			}
 		}
 
+	public ASTNode Evaluate(ASTNode rootNode) {
+		ASTNode reduced = Reduce(rootNode);
+		CleanAST(reduced);
+		ASTs.add(reduced);
+		return reduced;
+	}
+		
     public Evaluator(ASTNode rootNode)
     {
 
 			ASTs = new ArrayList<ASTNode>();
 			ASTs.add(rootNode);
-			ASTNode reduced = Reduce(rootNode);
-
-			CleanAST(reduced);
-			ASTs.add(reduced);
 
     }
 
