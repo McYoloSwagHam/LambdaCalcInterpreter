@@ -20,7 +20,7 @@ public class Evaluator
      */
 
 		//Basically copy over bottom branches of the tree with the 
-		public void applyToNewTree(ASTNode replacePoint, ASTNode currentNode, 
+		public void ApplyToNewTree(ASTNode replacePoint, ASTNode currentNode, 
 				HashMap<Character, ASTNode> values) {
 		
 
@@ -56,8 +56,7 @@ public class Evaluator
 					//newNode = newNode.parent;
 					currentNode = currentNode.parent;
 					currentIndex = indexTracker.pop();
-
-					//newNode = newNode.parent;
+					newNode = newNode.parent;
 
 					//assert newNode != null : "newNode parent null how?";
 
@@ -281,6 +280,8 @@ public class Evaluator
 				//leaf with no parent what lol?
 				ASTNode leaf = reducableBranches.get(leafIndex);
 				ASTNode replacePoint = replacePoints.get(leafIndex);
+
+				System.out.println("leaf : " + ASTFormatter.FormatNode(leaf));
 				
 
 				//should never happen, literally
@@ -306,18 +307,6 @@ public class Evaluator
 				int argsLeft = leaf.parent.child.size() - 1;
 				int numArgs = Math.min(argsLeft, numParams);
 
-				//Copy over remaining branches 
-				//because we didn't need to simplify them
-				//since we filled all our local function variables
-
-				if (argsLeft > numParams) {
-					for (int i = numParams; i < argsLeft; i++) {
-						ASTNode tmpNode = new ASTNode();
-						ASTNode unusedFunction = leaf.parent.child.get(i + 1);
-						tmpNode.CloneSubTree(unusedFunction);
-					}
-				}
-
 				// There must necessarily be functionCall(s) after this
 				// or atleast functionCall followed by nestedFunction
 
@@ -331,7 +320,7 @@ public class Evaluator
 				}
 
 
-				applyToNewTree(replacePoint,  leaf, functionMapper);
+				ApplyToNewTree(replacePoint,  leaf, functionMapper);
 
 			}
 
@@ -434,4 +423,5 @@ public class Evaluator
         // put your code here
         return x + y;
     }
+
 }

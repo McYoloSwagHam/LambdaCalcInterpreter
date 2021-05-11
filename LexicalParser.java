@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Write a description of class lexer here.
@@ -75,7 +72,7 @@ public class LexicalParser
                                     "needs to be ' ' or '.' or '(' ')' " + counter);
                         }
 
-												// Constructor does child parent linking
+												//Constructor does child parent linking
                         currentNode = new ASTNode(currentNode);
 												ExprRefCount += 1;
 												currentNode.lexicalDepth = ExprRefCount;
@@ -144,7 +141,18 @@ public class LexicalParser
                                         "must be preceded by '(' or ' ' " + counter);
                             }
 
-                            currentNode.functionCalls.add(currentLetter);
+
+														// we just went down a level
+														if (currentNode.functionCalls.size() != 0) {
+															currentNode = new ASTNode(currentNode.parent);
+															currentNode.functionType = FunctionType.FUNCTION_CALL;
+															currentNode.lexicalDepth = ExprRefCount;
+
+														}
+
+														currentNode.functionCalls.add(currentLetter);
+
+
                         } else {
                             currentNode.locals.add(currentLetter);
 
@@ -166,6 +174,7 @@ public class LexicalParser
 
 
         }
+
 
     public LexicalParser(String lambdaExpression) throws Exception {
         // initialise instance variables
