@@ -25,9 +25,10 @@ public class Evaluator {
     // This will be moving around following the
     ASTNode treeRoot = new ASTNode();
     ASTNode newNode = treeRoot;
-    // ASTNode lmaoRoot = new ASTNode();
-
+		
     // ASTNode newRoot = newNode;
+		
+		System.out.println("\nleaf : " + ASTFormatter.FormatNode(currentNode) + "\n");
 
     // Java no TCO so I hate recursion for handling this sorta stuff
     // each new stack frame is way bigger than you need for tracking this stuff
@@ -50,10 +51,11 @@ public class Evaluator {
           // TODO: Handle this too
         }
 
-        // newNode = newNode.parent;
+        if (newNode.parent != null) {
+          newNode = newNode.parent;
+        }
         currentNode = currentNode.parent;
         currentIndex = indexTracker.pop();
-        newNode = newNode.parent;
 
         // assert newNode != null : "newNode parent null how?";
 
@@ -63,7 +65,13 @@ public class Evaluator {
 
         // if we haven't found are first abstraction, it's definitely gonna be
         // part of the tree.
+
         currentNode = currentNode.child.get(currentIndex);
+
+        if (currentIndex == 0 && newNode.functionType == FunctionType.NESTED_FUNCTION && newNode.parent != null
+        && newNode.parent.child.size() == 1) {
+          newNode = new ASTNode(newNode.parent);
+        }
 
         // callback here
 
@@ -73,6 +81,17 @@ public class Evaluator {
         if (currentNode == null) {
           // TODO: Handle.
         }
+
+				//System.out.println("newNode : " + ASTFormatter.FormatNode(newNode));
+				//System.out.println("currentNode : " + ASTFormatter.FormatNode(currentNode));
+
+				//try {
+				//	System.out.println("treeRoot : ");
+				//	System.out.println(ASTFormatter.FormatAST(treeRoot));
+				//} catch (Exception err) {
+
+				//}
+
 
         switch (currentNode.functionType) {
           case NONE:
@@ -116,7 +135,7 @@ public class Evaluator {
             // The nested functions that remain don't share any local allocation
 
             // Create a new child node
-            newNode = new ASTNode(newNode);
+						newNode = new ASTNode(newNode);
             newNode.functionType = FunctionType.NESTED_FUNCTION;
             newNode.locals = new ArrayList<Character>(currentNode.locals);
             newNode.lexicalDepth = currentNode.lexicalDepth;
@@ -213,7 +232,8 @@ public class Evaluator {
         }
 
         // is abstraction and is on the very left side.
-        if (currentNode.functionType == FunctionType.NESTED_FUNCTION && currentIndex == 0) {
+        if (currentNode.functionType == FunctionType.NESTED_FUNCTION && currentIndex == 0 
+						&& currentNode.parent.child.size() != 1) {
           reducableBranches.add(currentNode);
           replacePoints.add(newNode);
         }
@@ -244,12 +264,6 @@ public class Evaluator {
     ASTNode lastNode = null;
     int lastLexicalDepth = 0;
 
-    // First nodes might be null from previous passes
-    for (ASTNode reducibleNode : reducableBranches) {
-      if (reducibleNode != null) {
-        lastLexicalDepth = node.lexicalDepth;
-      }
-    }
 
     for (int i = 0; i < reducableBranches.size(); i++) {
 
@@ -265,9 +279,11 @@ public class Evaluator {
       lastLexicalDepth = reducibleNode.lexicalDepth;
     }
 
-    if (reductionLeaves.size() == 0 && reducableBranches.size() != 0) {
-      reductionLeaves.add(reducableBranches.size() - 1);
-    }
+    int bestIndex = reductionLeaves.get(reductionLeaves.size()-1);
+
+    reductionLeaves = new ArrayList<Integer>();
+
+    reductionLeaves.add(bestIndex);
 
     for (int leafIndex : reductionLeaves) {
 
@@ -311,6 +327,33 @@ public class Evaluator {
       }
 
       ApplyToNewTree(replacePoint, leaf, functionMapper);
+
+
+      if (numParams > argsLeft) {
+
+        ASTNode changePoint = replacePoint.parent;
+        changePoint.functionType = FunctionType.NESTED_FUNCTION;
+
+        for (int i = 0; i < (numParams - argsLeft); i++) {
+          changePoint.locals.add(leaf.locals.get(numArgs + i));
+        }
+
+      } else if (argsLeft > numParams) {
+        ASTNode changePoint = replacePoint.parent;
+
+        for (int i = 0; i < (argsLeft - numParams); i++) {
+          changePoint.child.add(leaf.parent.child.get(i + numParams));
+        }
+
+        //for (ASTNode lolNode : changePoint.child) {
+        //  lolNode.parent = changePoint;
+        //}
+
+      }
+
+      //try {
+      //  System.out.println("replacePoint : " + ASTFormatter.FormatAST(replacePoint.parent));
+      //} catch (Exception e) {}
 
     }
 
@@ -360,6 +403,7 @@ public class Evaluator {
         // if we haven't found are first abstraction, it's definitely gonna be
         // part of the tree.
         currentNode = currentNode.child.get(currentIndex);
+				depth += 1;
         // callback here
 
         indexTracker.push(++currentIndex);
@@ -370,7 +414,8 @@ public class Evaluator {
           // TODO: Handle.
         }
 
-        if (currentNode.functionType == FunctionType.NONE) {
+        if (currentNode.functionType == FunctionType.NONE && currentNode.parent != null &&
+        currentNode.parent.child.size() == 1) {
 
           for (ASTNode node : currentNode.child) {
             node.parent = currentNode.parent;
@@ -381,17 +426,24 @@ public class Evaluator {
           }
 
           indexTracker.pop();
-
-        } else {
-          depth++;
-          currentNode.lexicalDepth = depth;
+          //depth -= 1;
         }
+				currentNode.lexicalDepth = depth;
+
       }
     }
   }
 
   public ASTNode Evaluate(ASTNode rootNode) {
     ASTNode reduced = Reduce(rootNode);
+    
+    if (reduced.functionType != FunctionType.NONE) {
+      ASTNode topNode = new ASTNode();
+      reduced.parent = topNode;
+      topNode.child.add(reduced);
+      reduced = topNode;
+    }
+
     CleanAST(reduced);
     return reduced;
   }

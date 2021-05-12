@@ -17,8 +17,15 @@ public class main {
     // initialise instance variables
 
     Scanner scan = new Scanner(System.in);
-    String userInput = scan.nextLine();
-    //String userInput = "(a (\\f.\\x.(f x))(\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x))))";
+    //String userInput = scan.nextLine();
+    String userInput = "(\\f.\\x.(f (f (f (f (f x))))))(\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))";
+    //String userInput = "(a ((\\b.\\c.(b (\\f.\\x.(f (f x))) b c))))";
+    //String userInput = "(a ((\\b.\\c.(b (b c)(b c)))))";
+    //String userInput = "((\\a.\\b.\\c.(a (b c)))(\\f.\\x.(f (f (f x))))(\\f.\\x.(f (f (f (f x))))))";
+    //String userInput = "(\\x.\\y.(x (y (\\a.\\b.\\c.(b (a b c))) (\\d.\\p.(d p)))))(\\f.\\x.(e (e l)))(\\f.\\x.(f x))";
+    //String userInput = "(\\b.\\e.(e b))(\\f.\\x.(f (f (f x))))(\\f.\\d.(f (f d)))";
+
+    //String userInput = "(\\n.\\f.\\x.(n (\\g.\\h.(h (g f))) (\\u.(x)) (\\u.(u)) ))(\\e.\\l.(e (e l)))";
 
     try {
 
@@ -26,7 +33,7 @@ public class main {
       Evaluator eval = new Evaluator();
       ASTNode reduced = lexer.rootNode;
       
-      System.out.println(ASTFormatter.FormatAST(lexer.rootNode));
+      System.out.println("lexer : " + ASTFormatter.FormatAST(lexer.rootNode));
 
       ArrayList<Integer> ASTHashes = new ArrayList<Integer>();
       ArrayList<ASTNode> ASTs = new ArrayList<ASTNode>();
@@ -40,6 +47,7 @@ public class main {
         lastHash = currentHash;
         reduced = eval.Evaluate(reduced);
         currentHash = ASTNode.HashAST(reduced);
+        System.out.println("\n");
         System.out.println(ASTFormatter.FormatAST(reduced));
       }
 
