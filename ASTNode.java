@@ -26,8 +26,8 @@ import java.util.*;
 public class ASTNode {
 
   // current locals of the node.
-  public ArrayList<Character> locals;
-  public ArrayList<Character> functionCalls;
+  public ArrayList<String> locals;
+  public ArrayList<String> functionCalls;
   public static final int PRIME_BASE = 65537;
   public ASTNode parent;
   public ArrayList<ASTNode> child;
@@ -41,6 +41,15 @@ public class ASTNode {
     hash ^= info;
     hash += info % 2;
     return hash;
+  }
+
+  public void Upgrade() {
+
+    //Remove this from parent
+    this.parent.child.remove(this);
+    this.parent = this.parent.parent;
+    this.parent.child.add(this);
+    this.lexicalDepth -= 1;
   }
 
   public static int HashAST(ASTNode rootNode) {
@@ -87,18 +96,31 @@ public class ASTNode {
 
         switch (currentNode.functionType) {
           case FUNCTION_CALL:
-            for (char call : currentNode.functionCalls) {
+            for (String call : currentNode.functionCalls) {
 
+              int stringValue = 0;
+              
+              for (char letter : call.toCharArray()) {
+                stringValue += letter;
+              }
               // cast character to ascii integer
-              rollingHash = RollingHash(rollingHash, call - 0);
+              rollingHash = RollingHash(rollingHash, stringValue);
             }
 
             break;
           case NESTED_FUNCTION:
-            for (char local : currentNode.locals) {
+          
+
+            for (String local : currentNode.locals) {
+
+              int stringValue = 0;
+              
+              for (char letter : local.toCharArray()) {
+                stringValue += letter;
+              }
 
               // cast character to ascii integer
-              rollingHash = RollingHash(rollingHash, local - 0);
+              rollingHash = RollingHash(rollingHash, stringValue);
             }
 
         }
@@ -180,9 +202,9 @@ public class ASTNode {
         // copy over locals
         // yes I know that it already had an empty initialized
         // array, but I also have no idea whether this is better
-        targetNode.locals = new ArrayList<Character>(sourceNode.locals);
+        targetNode.locals = new ArrayList<String>(sourceNode.locals);
       case FUNCTION_CALL:
-        targetNode.functionCalls = new ArrayList<Character>(sourceNode.functionCalls);
+        targetNode.functionCalls = new ArrayList<String>(sourceNode.functionCalls);
       default:
         // unreachable
         break;
@@ -193,8 +215,8 @@ public class ASTNode {
 
   public ASTNode(ASTNode nodeParent) {
 
-    locals = new ArrayList<Character>();
-    functionCalls = new ArrayList<Character>();
+    locals = new ArrayList<String>();
+    functionCalls = new ArrayList<String>();
     // NodeType = FunctionType.NONE;
     functionType = FunctionType.NONE;
     parent = nodeParent;
@@ -205,8 +227,8 @@ public class ASTNode {
 
   public ASTNode() {
 
-    locals = new ArrayList<Character>();
-    functionCalls = new ArrayList<Character>();
+    locals = new ArrayList<String>();
+    functionCalls = new ArrayList<String>();
     // NodeType = FunctionType.NONE;
     functionType = FunctionType.NONE;
     parent = null;

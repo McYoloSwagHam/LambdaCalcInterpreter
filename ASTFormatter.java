@@ -39,9 +39,9 @@ public class ASTFormatter {
       case NONE:
         return "No Information";
       case NESTED_FUNCTION:
-        return CharArrayToString(node.locals);
+        return node.locals.toString();
       case FUNCTION_CALL:
-        return CharArrayToString(node.functionCalls);
+        return node.functionCalls.toString();
       default:
         return "UNREACHABLE - this is a bug";
     }

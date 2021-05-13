@@ -20,19 +20,19 @@ public class Evaluator {
    */
 
   // Basically copy over bottom branches of the tree with the
-  public void ApplyToNewTree(ASTNode replacePoint, ASTNode currentNode, HashMap<Character, ASTNode> values) {
+  public void ApplyToNewTree(ASTNode replaceNode, ASTNode currentNode, HashMap<String, ASTNode> values) {
+
+
+    //Since we cannot iterate over a structure we're editing
+    //(possible but hard)
+    //We're just gonna iterate over the previous structure handed to us
+    //following and making adjustments in our new struct
+    
+    ASTNode newNode = replaceNode;
+
+    System.out.println(ASTFormatter.FormatNode(replaceNode));
 
     // This will be moving around following the
-    ASTNode treeRoot = new ASTNode();
-    ASTNode newNode = treeRoot;
-		
-    // ASTNode newRoot = newNode;
-		
-		System.out.println("\nleaf : " + ASTFormatter.FormatNode(currentNode) + "\n");
-
-    // Java no TCO so I hate recursion for handling this sorta stuff
-    // each new stack frame is way bigger than you need for tracking this stuff
-
     Stack<Integer> indexTracker = new Stack<Integer>();
     int currentIndex = 0;
 
@@ -51,9 +51,7 @@ public class Evaluator {
           // TODO: Handle this too
         }
 
-        if (newNode.parent != null) {
-          newNode = newNode.parent;
-        }
+        newNode = newNode.parent;
         currentNode = currentNode.parent;
         currentIndex = indexTracker.pop();
 
@@ -67,12 +65,7 @@ public class Evaluator {
         // part of the tree.
 
         currentNode = currentNode.child.get(currentIndex);
-
-        if (currentIndex == 0 && newNode.functionType == FunctionType.NESTED_FUNCTION && newNode.parent != null
-        && newNode.parent.child.size() == 1) {
-          newNode = new ASTNode(newNode.parent);
-        }
-
+        newNode = newNode.child.get(currentIndex);
         // callback here
 
         indexTracker.push(++currentIndex);
@@ -82,38 +75,18 @@ public class Evaluator {
           // TODO: Handle.
         }
 
-				//System.out.println("newNode : " + ASTFormatter.FormatNode(newNode));
-				//System.out.println("currentNode : " + ASTFormatter.FormatNode(currentNode));
-
-				//try {
-				//	System.out.println("treeRoot : ");
-				//	System.out.println(ASTFormatter.FormatAST(treeRoot));
-				//} catch (Exception err) {
-
-				//}
-
-
         switch (currentNode.functionType) {
           case NONE:
             break;
           case FUNCTION_CALL:
 
             // ArrayList<Character> toRemove = new ArrayList<Character>();
-            ASTNode curNode = newNode;
-            ASTNode tmpNode;
+            for (String call : currentNode.functionCalls) {
 
-            for (char call : currentNode.functionCalls) {
-
-              tmpNode = new ASTNode(curNode);
-              tmpNode.functionType = FunctionType.FUNCTION_CALL;
               ASTNode function = values.get(call);
 
               if (function != null) {
-                tmpNode = tmpNode.CloneSubTree(function);
-                newNode = tmpNode;
-              } else {
-                tmpNode.functionCalls.add(call);
-                newNode = tmpNode;
+                newNode.CloneSubTree(function);
               }
 
             }
@@ -122,23 +95,19 @@ public class Evaluator {
           case NESTED_FUNCTION:
             // Currently we don't handle register renaming
 
-            for (char local : currentNode.locals) {
+            //rename register
+            for (int i = 0; i < currentNode.locals.size(); i++) {
+              String local = currentNode.locals.get(i);
               if (values.get(local) != null) {
-                System.out.println("fuck this failed");
-                // throw new Exception("Cannot handle mulitple same named variables in nested
-                // functions");
+                String replacement = local + "0";
+                currentNode.locals.set(i, replacement);
               }
-
             }
 
             // Since obviously we don't allow register renaming
             // The nested functions that remain don't share any local allocation
 
             // Create a new child node
-						newNode = new ASTNode(newNode);
-            newNode.functionType = FunctionType.NESTED_FUNCTION;
-            newNode.locals = new ArrayList<Character>(currentNode.locals);
-            newNode.lexicalDepth = currentNode.lexicalDepth;
             // hopefully it makes a new heap allocation.
             // I hope this doesn't just point to the other locals
             // Since I have no idea how the lifetimes collid
@@ -147,12 +116,6 @@ public class Evaluator {
         }
       }
     }
-
-    // replace the replacePoint Node
-    replacePoint.parent.child = new ArrayList<ASTNode>();
-    replacePoint.parent.child.add(treeRoot);
-    treeRoot.parent = replacePoint.parent;
-    // replacePoint.parent.child.remove(replacePoint);
 
   }
 
@@ -167,7 +130,7 @@ public class Evaluator {
     ArrayList<ASTNode> reducableBranches = new ArrayList<ASTNode>();
 
     // This is basically the same as
-    ArrayList<ASTNode> replacePoints = new ArrayList<ASTNode>();
+    ArrayList<ASTNode> replaceNodes = new ArrayList<ASTNode>();
     int currentIndex = 0;
 
     // Empty tree already reduced
@@ -196,6 +159,9 @@ public class Evaluator {
     // We're copying the whole tree to the new node
     // then we go over each part that needs to be reduced
     // reduce it and the detach links in the new tree
+
+    ASTNode reduceNode = null;
+    ASTNode replaceNode = null;
 
     while (true) {
 
@@ -232,10 +198,9 @@ public class Evaluator {
         }
 
         // is abstraction and is on the very left side.
-        if (currentNode.functionType == FunctionType.NESTED_FUNCTION && currentIndex == 0 
-						&& currentNode.parent.child.size() != 1) {
-          reducableBranches.add(currentNode);
-          replacePoints.add(newNode);
+        if (currentNode.functionType == FunctionType.NESTED_FUNCTION && currentIndex == 0) {
+          reduceNode = currentNode;
+          replaceNode = newNode;
         }
 
         indexTracker.push(++currentIndex);
@@ -247,114 +212,52 @@ public class Evaluator {
 
     }
 
-    // Array of Ast nodes goes like this
-    // AstNode
-    // AstNode
-    // AstNode
-    // AstNode
-    //
-    // each indent is a new reducable branch
-    // we HAVE to reduce the inner branches before reducing the outer branches
+  // Nothing to reduce.
+  if (reduceNode == null || replaceNode == null) {
+    return newTree;
+  }
 
-    if (reducableBranches.size() == 0) {
+
+    // should never happen, literally
+    if (reduceNode.parent == null) {
       return newTree;
     }
 
-    ArrayList<Integer> reductionLeaves = new ArrayList<Integer>();
-    ASTNode lastNode = null;
-    int lastLexicalDepth = 0;
+    int numParams = reduceNode.locals.size();
+    int argsLeft = reduceNode.parent.child.size() - 1;
+    int numArgs = Math.min(argsLeft, numParams);
 
+    // There must necessarily be functionCall(s) after this
+    // or atleast functionCall followed by nestedFunction
 
-    for (int i = 0; i < reducableBranches.size(); i++) {
+    HashMap<String, ASTNode> functionMapper = new HashMap<String, ASTNode>();
 
-      ASTNode reducibleNode = reducableBranches.get(i);
+    // Map functions to name
+    for (int i = 0; i < numArgs; i++) {
+      String funcName = reduceNode.locals.get(i);
 
-      // First cmp will always pass since the first nodes are equal
-      if (reducibleNode.lexicalDepth > lastLexicalDepth) {
-        reductionLeaves.add(i);
-        // We're gonna use this list as a checklist
-        // to see what we have to finish
-      }
-
-      lastLexicalDepth = reducibleNode.lexicalDepth;
+      ASTNode appliedNode = reduceNode.parent.child.get(i + 1);
+      functionMapper.put(funcName, appliedNode);
     }
 
-    int bestIndex = reductionLeaves.get(reductionLeaves.size()-1);
+    ApplyToNewTree(replaceNode, reduceNode, functionMapper);
 
-    reductionLeaves = new ArrayList<Integer>();
 
-    reductionLeaves.add(bestIndex);
+    if (numParams > argsLeft) {
 
-    for (int leafIndex : reductionLeaves) {
+      ASTNode changePoint = replaceNode.parent;
+      changePoint.functionType = FunctionType.NESTED_FUNCTION;
 
-      // leaf with no parent what lol?
-      ASTNode leaf = reducableBranches.get(leafIndex);
-      ASTNode replacePoint = replacePoints.get(leafIndex);
-
-      // should never happen, literally
-      if (leaf.parent == null) {
-        continue;
+      for (int i = 0; i < (numParams - argsLeft); i++) {
+        changePoint.locals.add(reduceNode.locals.get(numArgs + i));
       }
 
-      // NestedFunc
-      // FunctionCall
-      // NestedFunc
-      // FunctionCall
-      // NestedFunc
-      // FunctionCall
-      //
-      // into:
-      //
-      // NestedFunc
-      // FunctionCall
-      // NestedFunc
-      // FunctionCall
-      //
-      int numParams = leaf.locals.size();
-      int argsLeft = leaf.parent.child.size() - 1;
-      int numArgs = Math.min(argsLeft, numParams);
+    } else if (argsLeft > numParams) {
+      ASTNode changePoint = replaceNode.parent;
 
-      // There must necessarily be functionCall(s) after this
-      // or atleast functionCall followed by nestedFunction
-
-      HashMap<Character, ASTNode> functionMapper = new HashMap<Character, ASTNode>();
-
-      // Map functions to name
-      for (int i = 0; i < numArgs; i++) {
-        char funcName = leaf.locals.get(i);
-        ASTNode appliedNode = leaf.parent.child.get(i + 1);
-        functionMapper.put(funcName, appliedNode);
+      for (int i = 0; i < (argsLeft - numParams); i++) {
+        changePoint.child.add(reduceNode.parent.child.get(i + numParams));
       }
-
-      ApplyToNewTree(replacePoint, leaf, functionMapper);
-
-
-      if (numParams > argsLeft) {
-
-        ASTNode changePoint = replacePoint.parent;
-        changePoint.functionType = FunctionType.NESTED_FUNCTION;
-
-        for (int i = 0; i < (numParams - argsLeft); i++) {
-          changePoint.locals.add(leaf.locals.get(numArgs + i));
-        }
-
-      } else if (argsLeft > numParams) {
-        ASTNode changePoint = replacePoint.parent;
-
-        for (int i = 0; i < (argsLeft - numParams); i++) {
-          changePoint.child.add(leaf.parent.child.get(i + numParams));
-        }
-
-        //for (ASTNode lolNode : changePoint.child) {
-        //  lolNode.parent = changePoint;
-        //}
-
-      }
-
-      //try {
-      //  System.out.println("replacePoint : " + ASTFormatter.FormatAST(replacePoint.parent));
-      //} catch (Exception e) {}
-
     }
 
     return newTree;
@@ -426,7 +329,7 @@ public class Evaluator {
           }
 
           indexTracker.pop();
-          //depth -= 1;
+          depth -= 1;
         }
 				currentNode.lexicalDepth = depth;
 

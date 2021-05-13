@@ -33,6 +33,11 @@ public class LexicalParser {
     boolean isLocalDefinitionAllowed = false;
     boolean lastWasLetter = false;
 
+    //Everytime we upgrade a node
+    //we have to skip a ')', because that takes us up the AST
+    int upgradeCount = 0;
+
+
     // While it may be smart to use an iterator and move that along
     // The most information we need is
     char lastCharacter = ' ';
@@ -88,9 +93,13 @@ public class LexicalParser {
             return;
           }
 
-          currentNode = currentNode.parent;
+          if (upgradeCount == 0) {
+            currentNode = currentNode.parent;
+            ExprRefCount -= 1;
+          } else {
+            upgradeCount -= 1;
+          }
 
-          ExprRefCount -= 1;
           continue;
         case '\\':
           // This is invalid,
@@ -165,10 +174,20 @@ public class LexicalParser {
 
             }
 
-            currentNode.functionCalls.add(currentLetter);
+            currentNode.functionCalls.add(Character.toString(currentLetter));
 
           } else {
-            currentNode.locals.add(currentLetter);
+            
+            //We need to upgrade because we just figured out
+            //That this is a abstraction
+
+            if (currentNode.locals.size() == 0 && currentNode.parent != null && currentNode.parent.parent != null) {
+              currentNode.Upgrade();
+              upgradeCount++;
+              ExprRefCount--;
+            }
+
+            currentNode.locals.add(Character.toString(currentLetter));
 
             if (lastCharacter != '\\') {
               throw new LexerError("Syntax Error: local definition must be preceded by '.' " + counter);
