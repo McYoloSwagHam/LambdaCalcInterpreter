@@ -30,11 +30,17 @@ public class Evaluator {
     
     ASTNode newNode = replaceNode;
 
-    System.out.println(ASTFormatter.FormatNode(replaceNode));
-
     // This will be moving around following the
+
+
+    HashMap<String, Integer> ignoreMap = new HashMap<String, Integer>();
+
+    // We need 2 trackers, because we're modifying one tree
+    // so when we copy subtrees we're gonna need to modify the tracker
+    Stack<Integer> copyTracker = new Stack<Integer>();
     Stack<Integer> indexTracker = new Stack<Integer>();
     int currentIndex = 0;
+    int copyIndex = 0;
 
     while (true) {
 
@@ -54,6 +60,20 @@ public class Evaluator {
         newNode = newNode.parent;
         currentNode = currentNode.parent;
         currentIndex = indexTracker.pop();
+        copyIndex = copyTracker.pop();
+
+
+        Iterator<Map.Entry<String, Integer>> iter = ignoreMap.entrySet().iterator();
+
+        while (iter.hasNext()) {
+
+          Map.Entry<String, Integer> entry = iter.next();
+          
+          if (entry.getValue() == indexTracker.size()) {
+            iter.remove();
+          }
+
+        }
 
         // assert newNode != null : "newNode parent null how?";
 
@@ -64,12 +84,19 @@ public class Evaluator {
         // if we haven't found are first abstraction, it's definitely gonna be
         // part of the tree.
 
+        try {
+          //System.out.println("intermediate : "  + ASTFormatter.FormatAST(replaceNode));
+        } catch (Exception e) {}
+
+
         currentNode = currentNode.child.get(currentIndex);
-        newNode = newNode.child.get(currentIndex);
+        newNode = newNode.child.get(copyIndex);
         // callback here
 
         indexTracker.push(++currentIndex);
+        copyTracker.push(++copyIndex);
         currentIndex = 0;
+        copyIndex = 0;
 
         if (currentNode == null) {
           // TODO: Handle.
@@ -81,14 +108,48 @@ public class Evaluator {
           case FUNCTION_CALL:
 
             // ArrayList<Character> toRemove = new ArrayList<Character>();
+            // So there's a small problem we want to clone the subtree that we 
+            // want to substitute into this node, but we'll lose its children
+            // since we'll overwrite the child field 
+            // but if we keep the children we have to mark them for deletion later
+
             for (String call : currentNode.functionCalls) {
 
               ASTNode function = values.get(call);
 
-              if (function != null) {
+              if (function != null && ignoreMap.get(call) == null) {
+                ArrayList<ASTNode> savedChild = newNode.child;
+                newNode.child = new ArrayList<ASTNode>();
                 newNode.CloneSubTree(function);
-              }
+                  
+                if (savedChild.size() != 0) {
 
+                  ASTNode noneNode = new ASTNode();
+
+                  // child age is just the index into
+                  // the array that holds the children
+                  int childAge = indexTracker.pop();
+                    
+                  noneNode.parent = newNode.parent;
+                  noneNode.child = savedChild;
+                  
+                  for (ASTNode child : noneNode.child) {
+                    child.parent = noneNode;
+                  }
+
+                  newNode.parent.child.add(childAge, noneNode);
+
+                  indexTracker.push(childAge);
+                  newNode = noneNode;
+                }
+
+
+
+
+
+                //copyIndex += newNode.child.size();
+                //newNode.child.addAll(savedChild);
+              }
             }
 
             break;
@@ -99,8 +160,9 @@ public class Evaluator {
             for (int i = 0; i < currentNode.locals.size(); i++) {
               String local = currentNode.locals.get(i);
               if (values.get(local) != null) {
-                String replacement = local + "0";
-                currentNode.locals.set(i, replacement);
+
+                ignoreMap.put(local, indexTracker.size());
+
               }
             }
 
@@ -198,9 +260,11 @@ public class Evaluator {
         }
 
         // is abstraction and is on the very left side.
-        if (currentNode.functionType == FunctionType.NESTED_FUNCTION && currentIndex == 0) {
-          reduceNode = currentNode;
-          replaceNode = newNode;
+        if (currentNode.functionType == FunctionType.NESTED_FUNCTION && currentIndex == 0 && currentNode.parent.child.size() != 1) {
+          if (reduceNode == null || replaceNode == null) {
+            reduceNode = currentNode;
+            replaceNode = newNode;
+          }
         }
 
         indexTracker.push(++currentIndex);
@@ -231,34 +295,54 @@ public class Evaluator {
     // or atleast functionCall followed by nestedFunction
 
     HashMap<String, ASTNode> functionMapper = new HashMap<String, ASTNode>();
-
+    ArrayList<String> toRemove = new ArrayList<String>();
     // Map functions to name
     for (int i = 0; i < numArgs; i++) {
       String funcName = reduceNode.locals.get(i);
-
+      toRemove.add(funcName);
       ASTNode appliedNode = reduceNode.parent.child.get(i + 1);
       functionMapper.put(funcName, appliedNode);
     }
 
+
+    System.out.println("Leaf : " + ASTFormatter.FormatNode(replaceNode));
+
+    replaceNode.locals.removeAll(toRemove);
+
+    //If we've removed all the variables change it into a NONE type
+    if (replaceNode.locals.size() == 0) {
+      replaceNode.functionType = FunctionType.NONE;
+    }
+
     ApplyToNewTree(replaceNode, reduceNode, functionMapper);
 
+    ArrayList<ASTNode> toUnlink = new ArrayList<ASTNode>();
 
-    if (numParams > argsLeft) {
-
-      ASTNode changePoint = replaceNode.parent;
-      changePoint.functionType = FunctionType.NESTED_FUNCTION;
-
-      for (int i = 0; i < (numParams - argsLeft); i++) {
-        changePoint.locals.add(reduceNode.locals.get(numArgs + i));
-      }
-
-    } else if (argsLeft > numParams) {
-      ASTNode changePoint = replaceNode.parent;
-
-      for (int i = 0; i < (argsLeft - numParams); i++) {
-        changePoint.child.add(reduceNode.parent.child.get(i + numParams));
-      }
+    for (int i = 0; i < numArgs; i++) {
+      toUnlink.add(replaceNode.parent.child.get(i+1));
     }
+
+    replaceNode.parent.child.removeAll(toUnlink);
+
+    try {
+      //System.out.println("lol : " + ASTFormatter.FormatAST(newTree));
+    } catch (Exception Err) {}
+
+    //if (numParams > argsLeft) {
+    //  
+    //  for (int i = 0; i < replaceNode.parent.child.size(); i++) {
+    //    if (i == 0) { continue; }
+    //    replaceNode.parent.child.get(i).Unlink();
+    //  }
+    //  
+
+    //} else if (argsLeft > numParams) {
+    //  ASTNode changePoint = replaceNode.parent;
+
+    //  for (int i = 0; i < (argsLeft - numParams); i++) {
+    //    changePoint.child.add(reduceNode.parent.child.get(i + numParams));
+    //  }
+    //}
 
     return newTree;
 
@@ -305,6 +389,8 @@ public class Evaluator {
 
         // if we haven't found are first abstraction, it's definitely gonna be
         // part of the tree.
+
+
         currentNode = currentNode.child.get(currentIndex);
 				depth += 1;
         // callback here
@@ -312,40 +398,61 @@ public class Evaluator {
         indexTracker.push(++currentIndex);
         currentIndex = 0;
 
+        try {
+          //System.out.println("indexTracker : " + indexTracker);
+          //System.out.println("Cleaning : " + ASTFormatter.FormatAST(rootNode));
+        } catch (Exception err) {}
+
         if (currentNode == null) {
           System.out.println("fudege " + currentNode);
           // TODO: Handle.
         }
 
         if (currentNode.functionType == FunctionType.NONE && currentNode.parent != null &&
-        currentNode.parent.child.size() == 1) {
+        currentNode.child.size() == 1) {
+
+          //System.out.println("lmao");
 
           for (ASTNode node : currentNode.child) {
             node.parent = currentNode.parent;
           }
 
           if (currentNode.parent != null) {
-            currentNode.parent.child = currentNode.child;
+
+            int childAge = indexTracker.pop();
+
+            currentNode.parent.child.addAll(childAge, currentNode.child);
+            currentNode.parent.child.remove(currentNode);
+            //indexTracker.push(indexTracker.pop() + 1);
+
+          } else {
+            indexTracker.pop();
           }
 
-          indexTracker.pop();
           depth -= 1;
         }
 				currentNode.lexicalDepth = depth;
 
       }
     }
+
+    return;
+
   }
 
   public ASTNode Evaluate(ASTNode rootNode) {
     ASTNode reduced = Reduce(rootNode);
     
-    if (reduced.functionType != FunctionType.NONE) {
-      ASTNode topNode = new ASTNode();
-      reduced.parent = topNode;
-      topNode.child.add(reduced);
-      reduced = topNode;
-    }
+    //if (reduced.functionType != FunctionType.NONE) {
+      //ASTNode topNode = new ASTNode();
+      //reduced.parent = topNode;
+      //topNode.child.add(reduced);
+      //reduced = topNode;
+    //}
+
+    try {
+      //System.out.println("NotCleaned : " + ASTFormatter.FormatAST(reduced));
+    } catch (Exception E ) {}
 
     CleanAST(reduced);
     return reduced;

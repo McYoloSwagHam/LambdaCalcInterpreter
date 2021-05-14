@@ -20,12 +20,12 @@ public class main {
     //String userInput = scan.nextLine();
     //String userInput = "(\\f.\\x.(f (f (f (f (f x))))))(\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))";
     //String userInput = "(a ((\\b.\\c.(b (\\f.\\x.(f (f x))) b c))))";
-    //String userInput = "(a ((\\b.\\c.(b (b c)(b c)))))";
-    //String userInput = "((\\a.\\b.\\c.(a (b c)))(\\f.\\x.(f (f (f x))))(\\f.\\x.(f (f (f (f x))))))";
+    String userInput = "(a ((\\b.\\c.(b (b c)(b c)))))";
+    //String userInput = "(\\a.\\b.\\f.(a (b f)))(\\f.\\x.(f (f x)))(\\f.\\x.(f (f (f x))))";
     //String userInput = "(\\x.\\y.(x (y (\\a.\\b.\\c.(b (a b c))) (\\d.\\p.(d p)))))(\\f.\\x.(e (e l)))(\\f.\\x.(f x))";
     //String userInput = "(\\b.\\e.(e b))(\\f.\\x.(f (f (f x))))(\\f.\\d.(f (f d)))";
 
-    String userInput = "(\\n.\\f.\\x.(n (\\g.\\h.(h (g f))) (\\u.(x)) (\\u.(u)) ))(\\e.\\l.(e (e l)))";
+    //String userInput = "(\\n.\\f.\\x.(n (\\g.\\h.(h (g f))) (\\u.(x)) (\\u.(u)) ))(\\e.\\l.(e (e (e l))))";
 
     try {
 

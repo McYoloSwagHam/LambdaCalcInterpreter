@@ -43,6 +43,9 @@ public class ASTNode {
     return hash;
   }
 
+  public void Unlink() {
+  }
+
   public void Upgrade() {
 
     //Remove this from parent

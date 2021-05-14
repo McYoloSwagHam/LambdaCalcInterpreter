@@ -1,0 +1,86 @@
+nested n f x
+  call n 
+  nested g h 
+    call h
+      call g f
+  nested u
+    call x
+  nested u
+    call u 
+nested e l
+  call e 
+    call e l
+
+
+nested f x 
+  nested e l <--- leaf
+    call e
+      call e l 
+  nested g h
+    call h
+      call g f
+  nested u 
+    call x
+  nested u
+    call u
+
+nested f x
+  none
+    nested g h <----- leaf
+      call h 
+        call g f
+    none
+      nested g h
+        call h 
+          call g f
+      nested u
+        call x
+  nested u x
+
+  nested f x
+    none
+      nested h
+        call h
+        none 
+          nested g h <--- leaf 
+            call h
+              call g f
+          nested u
+            call x
+        call f
+    nested u
+      call u
+            
+nested f x
+
+
+(\\n.\\f.\\x.(n (\\g.\\h.(h (g f))) (\\u.(x)) (\\u.(u)) ))(\\e.\\l.(e (e l)))
+(\\f.\\x.((\\e.\\l.(e (e l))) (\\g.\\h.(h (g f))) (\\u.(x)) (\\u.(u)) ))
+(\\f.\\x.(((\\g.\\h.(h (g f))) ((\\g.\\h.(h (g f))) (\\u.(x))))   (\\u.(u))))
+
+(\\f.\\x.(((\\h.(h (((\\g.\\h.(h (g f))) (\\u.(x))) f))) ) (\\u.(u))))
+
+(\\f.\\x.((\\u.(u)) (((\\g.\\h.(h (g f))) (\\u.(x))) f)))
+(\\f.\\x.((((\\g.\\h.(h (g f))) (\\u.(x))) f)))
+(\\f.\\x.(((\\h.(h ((\\u.(x)) f))) ) f))
+(\\f.\\x.(((\\h.(h x))) f))
+(\\f.\\x.((f x)))
+
+
+(\\f.\\x.( ( (\\h.(h ((((f (x)))) ) )))     (\\u.(u))  ))
+(\\f.\\x.(((\\u.(u)) (((\\g.\\h.(h (g f))) (\\u.(x))) f))   ))
+(\\f.\\x.(((((\\g.\\h.(h (g f))) (\\u.(x))) f))))
+
+nested f x
+  none
+    none
+      none
+        none 
+          call f
+          nested u
+            
+
+
+
+(\\f.\\x.(   (((((f ((\\u.(x))) f)))))  ))
+(\\f.\\x.(f (x))
