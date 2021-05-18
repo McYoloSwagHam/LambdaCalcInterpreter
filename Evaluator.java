@@ -2,37 +2,28 @@ import java.util.*;
 
 /**
  * Iteratively reduce the expression tree, substituting the relevant functions
- * 
- * @author (your name)
- * @version (a version number or a date)
+ * and reducing and cleaning the AST, removing empty brackets (Null Nodes)
  */
 public class Evaluator {
-  // instance variables - replace the example below with your own
-  private int x;
 
-  // This holds the rootNode
-  // of each step of the AST reduction
-  // this way we can visualize the reduction live
-  public ArrayList<ASTNode> ASTs;
-
-  /**
-   * Constructor for objects of class evaluator
-   */
-
-  // Basically copy over bottom branches of the tree with the
+	/**
+	 * ApplyToNewTree is a function that reduces and applies substituion to a subtree
+	 *
+	 * @param replaceNode - this is the copy of the original tree that we will edit while iterating
+	 * @param currentNode - this is the original tree that we won't edit, we pass it because it's easier
+	 * to iterate it, becase we don't edit it
+	 * @param values - values is a hashmap of function calls, to substitute function calls with their relevant
+	 * nodes
+	 */
   public void ApplyToNewTree(ASTNode replaceNode, ASTNode currentNode, HashMap<String, ASTNode> values) {
 
 
-    //Since we cannot iterate over a structure we're editing
-    //(possible but hard)
-    //We're just gonna iterate over the previous structure handed to us
-    //following and making adjustments in our new struct
-    
+		// The currentNode of the new tree
     ASTNode newNode = replaceNode;
 
-    // This will be moving around following the
 
-
+		// If we encounter a nested abstraction that has the same local definitions
+		// we have to ignore it to be inline with lexical scoping.
     HashMap<String, Integer> ignoreMap = new HashMap<String, Integer>();
 
     // We need 2 trackers, because we're modifying one tree
@@ -46,6 +37,7 @@ public class Evaluator {
 
       // go up or exit
       if (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) {
+				//
         // exit
         if (indexTracker.empty()) {
           break;
@@ -53,9 +45,8 @@ public class Evaluator {
 
         // Shouldn't happen because by the time
         // we make it up to the rootNode indexTracker should be empty
-        if (currentNode.parent == null) {
-          // TODO: Handle this too
-        }
+				assert currentNode.parent != null : "parent is null while going up tree";
+				assert newNode.parent != null : "parent is null while going up tree";
 
         newNode = newNode.parent;
         currentNode = currentNode.parent;
@@ -63,6 +54,9 @@ public class Evaluator {
         copyIndex = copyTracker.pop();
 
 
+				//if we've gone up the tree to the point where we're no longer in a nested 
+				//abstraction with local redefiniton we can remove these elements from the hash map
+				// this is how you iterate and remove elements from a hashmap as you iterate
         Iterator<Map.Entry<String, Integer>> iter = ignoreMap.entrySet().iterator();
 
         while (iter.hasNext()) {
@@ -75,19 +69,12 @@ public class Evaluator {
 
         }
 
-        // assert newNode != null : "newNode parent null how?";
-
         continue;
 
       } else {
 
         // if we haven't found are first abstraction, it's definitely gonna be
         // part of the tree.
-
-        try {
-          //System.out.println("intermediate : "  + ASTFormatter.FormatAST(replaceNode));
-        } catch (Exception e) {}
-
 
         currentNode = currentNode.child.get(currentIndex);
         newNode = newNode.child.get(copyIndex);
@@ -107,7 +94,6 @@ public class Evaluator {
             break;
           case FUNCTION_CALL:
 
-            // ArrayList<Character> toRemove = new ArrayList<Character>();
             // So there's a small problem we want to clone the subtree that we 
             // want to substitute into this node, but we'll lose its children
             // since we'll overwrite the child field 
@@ -304,12 +290,11 @@ public class Evaluator {
       functionMapper.put(funcName, appliedNode);
     }
 
-
-    System.out.println("Leaf : " + ASTFormatter.FormatNode(replaceNode));
+    //System.out.println("Leaf : " + ASTFormatter.FormatNode(replaceNode));
 
     replaceNode.locals.removeAll(toRemove);
 
-    //If we've removed all the variables change it into a NONE type
+		//Since we're reducing the abstraction 
     if (replaceNode.locals.size() == 0) {
       replaceNode.functionType = FunctionType.NONE;
     }
@@ -318,31 +303,13 @@ public class Evaluator {
 
     ArrayList<ASTNode> toUnlink = new ArrayList<ASTNode>();
 
+		//Since the nested abstraction is at the 0th index
+		//we just want to unlink the arguments which are obviously not the first
     for (int i = 0; i < numArgs; i++) {
       toUnlink.add(replaceNode.parent.child.get(i+1));
     }
 
     replaceNode.parent.child.removeAll(toUnlink);
-
-    try {
-      //System.out.println("lol : " + ASTFormatter.FormatAST(newTree));
-    } catch (Exception Err) {}
-
-    //if (numParams > argsLeft) {
-    //  
-    //  for (int i = 0; i < replaceNode.parent.child.size(); i++) {
-    //    if (i == 0) { continue; }
-    //    replaceNode.parent.child.get(i).Unlink();
-    //  }
-    //  
-
-    //} else if (argsLeft > numParams) {
-    //  ASTNode changePoint = replaceNode.parent;
-
-    //  for (int i = 0; i < (argsLeft - numParams); i++) {
-    //    changePoint.child.add(reduceNode.parent.child.get(i + numParams));
-    //  }
-    //}
 
     return newTree;
 
@@ -398,11 +365,6 @@ public class Evaluator {
         indexTracker.push(++currentIndex);
         currentIndex = 0;
 
-        try {
-          //System.out.println("indexTracker : " + indexTracker);
-          //System.out.println("Cleaning : " + ASTFormatter.FormatAST(rootNode));
-        } catch (Exception err) {}
-
         if (currentNode == null) {
           System.out.println("fudege " + currentNode);
           // TODO: Handle.
@@ -440,37 +402,22 @@ public class Evaluator {
 
   }
 
+	/**
+	 * reduces a given AST and cleans it
+	 * @param rootNode - the AST to evaluate
+	 * @return a new reduced and cleaned tree, it is a copy of the input tree
+	 */
   public ASTNode Evaluate(ASTNode rootNode) {
     ASTNode reduced = Reduce(rootNode);
-    
-    //if (reduced.functionType != FunctionType.NONE) {
-      //ASTNode topNode = new ASTNode();
-      //reduced.parent = topNode;
-      //topNode.child.add(reduced);
-      //reduced = topNode;
-    //}
-
-    try {
-      //System.out.println("NotCleaned : " + ASTFormatter.FormatAST(reduced));
-    } catch (Exception E ) {}
-
     CleanAST(reduced);
     return reduced;
   }
 
+	/**
+	 * Empty init.
+	 */
   public Evaluator() {
     
-  }
-
-  /**
-   * An example of a method - replace this comment with your own
-   *
-   * @param y a sample parameter for a method
-   * @return the sum of x and y
-   */
-  public int sampleMethod(int y) {
-    // put your code here
-    return x + y;
   }
 
 }

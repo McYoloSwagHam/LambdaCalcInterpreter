@@ -9,33 +9,64 @@ import java.util.*;
  * tree and figure out where the last expression ended
  *
  * E.G
- *
- *  Function1 -                         Function2 -                 Function3
- *    |                                                    |
- *    |                                                ....                                ....
- *  locals - function-body
- *                 |
- *           expression/Nested function
- *                                                   |
- *                                       locals  - function-body 
- *
- *
- *                                       etc.....
-*/
+ */
 
+/**
+ * ASTNode is the class that reprents a node in an AST, 
+ * it has 1 parent and many childs,
+ * it can either be a none (representing empty brackets),
+ * NESTED_FUNCTION (representing an abstraction)
+ * FUNCTION_CALL (represneting an application)
+ */
 public class ASTNode {
 
-  // current locals of the node.
+	/**
+	 * if the function is an abstraction
+	 * these are the locals
+	 */
   public ArrayList<String> locals;
+
+
+	/**
+	 * if the function is an application
+	 * these are the function calls
+	 */
   public ArrayList<String> functionCalls;
+
+	/**
+	 * for rolling hash purposes
+	 */
   public static final int PRIME_BASE = 65537;
+
+	/**
+	 * the parent of this node
+	 */
   public ASTNode parent;
+
+	/**
+	 * the children of this node
+	 */
   public ArrayList<ASTNode> child;
+
+	/**
+	 * how far down the the node is in the tree
+	 * used only for decorative purposes (printing)
+	 */
   public int lexicalDepth;
+
+	/**
+	 * what type of node is this
+	 */
   public FunctionType functionType;
 
-  // This is a dumb rolling hash for just making checksumming
-  // AST trees to realize that they're no longer reduceable
+	/**
+	 * this is my implementation of a dumb rolling hash that is
+	 * meant to be unique, obviously doesn't have a gread period,
+	 * could be its own class but it's way too small
+	 * @param hash - basically a this pointer
+	 * @param info - the hash info that changes this rolling hash
+	 * @return the new rolling hash
+	 */
   public static int RollingHash(int hash, int info) {
     hash *= PRIME_BASE;
     hash ^= info;
@@ -43,9 +74,9 @@ public class ASTNode {
     return hash;
   }
 
-  public void Unlink() {
-  }
-
+	/**
+	 * this function moves a node up a level.
+	 */
   public void Upgrade() {
 
     //Remove this from parent
@@ -55,6 +86,11 @@ public class ASTNode {
     this.lexicalDepth -= 1;
   }
 
+	/**
+	 * this function Hashes the AST starting from the rootNode
+	 * @param rootNode - the AST
+	 * @return the hash of the AST represented as an integer.
+	 */
   public static int HashAST(ASTNode rootNode) {
 
     ASTNode currentNode = rootNode;
@@ -137,11 +173,20 @@ public class ASTNode {
 
   }
 
+	/** 
+	 * checks if a node has children
+	 * @return true if this node has childre otherwise false
+	 */
   public boolean hasChildren() {
     return child.size() != 0;
   }
 
-  public ASTNode CloneSubTree(ASTNode sourceNode) {
+	/**
+	 * CloneSubTree literally recursively copies the tree of a node starting a sourceNode
+	 * to the currentNode, it is a graphic substition
+	 * @param sourceNode - the node to copy the tree from
+	 */
+  public void CloneSubTree(ASTNode sourceNode) {
 
     ASTNode newNode = this;
     ASTNode.CloneNode(sourceNode, newNode);
@@ -190,10 +235,14 @@ public class ASTNode {
       }
     }
 
-    return this;
-
   }
 
+	/**
+	 * this function copys the properties of the node from one node to another
+	 * but it does not copy the graphical portions (parents/children)
+	 * @param sourceNode - the source node to copy from
+	 * @param targetNode - the target node to copy to
+	 */
   public static void CloneNode(ASTNode sourceNode, ASTNode targetNode) {
     targetNode.functionType = sourceNode.functionType;
     targetNode.lexicalDepth = sourceNode.lexicalDepth;
@@ -216,11 +265,14 @@ public class ASTNode {
 
   }
 
+	/**
+	 * this constructor makes a new astnode, and links it to a parent
+	 * @param nodeParent - the to be parent of this node
+	 */
   public ASTNode(ASTNode nodeParent) {
 
     locals = new ArrayList<String>();
     functionCalls = new ArrayList<String>();
-    // NodeType = FunctionType.NONE;
     functionType = FunctionType.NONE;
     parent = nodeParent;
     parent.child.add(this);
@@ -228,11 +280,13 @@ public class ASTNode {
 
   }
 
+	/**
+	 * this constructor makes a empty new node assigned as a NONE type
+	 */
   public ASTNode() {
 
     locals = new ArrayList<String>();
     functionCalls = new ArrayList<String>();
-    // NodeType = FunctionType.NONE;
     functionType = FunctionType.NONE;
     parent = null;
     child = new ArrayList<ASTNode>();

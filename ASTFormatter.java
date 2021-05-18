@@ -1,8 +1,17 @@
 import java.util.*;
 
-// This class just makes it easy for us to debug our ASTs
+/**
+ * this class is just there for debugging and formatting
+ * it's only purpose it to turn an AST tree into a string form
+ * for printing
+ */
 public class ASTFormatter {
 
+	/**
+	 * returns a string based on the function type
+	 * @param funcType the function type of the node
+	 * @return the string that reprents the function type
+	 */
   public static String FormatFunctionType(FunctionType funcType) {
 
     switch (funcType) {
@@ -17,22 +26,12 @@ public class ASTFormatter {
     }
   }
 
-  // for the love of god why doesn't arraylist implement toString
-  // what sort of absurdity is this
-  public static String CharArrayToString(ArrayList<Character> vec) {
-
-    String finalString = new String("[");
-
-    for (char letter : vec) {
-      finalString += letter + ",";
-    }
-
-    finalString += "]";
-
-    return finalString;
-
-  }
-
+	/**
+	 * depending on the function type it returns the relevant information
+	 * for that node... (locals, function calls);
+	 * @param node the node whose information we need to format
+	 * @return the string that reprents the node info
+	 */
   public static String FormatNodeInformation(ASTNode node) {
 
     switch (node.functionType) {
@@ -48,6 +47,11 @@ public class ASTFormatter {
 
   }
 
+	/**
+	 * returns the string version of the node, could be toString for ASTNode
+	 * @param node - the node to format
+	 * @return the human understandable notation of the node as a string
+	 */
   public static String FormatNode(ASTNode node) {
 
     String finalString = "";
@@ -61,7 +65,12 @@ public class ASTFormatter {
 
   }
 
-  public static String FormatAST(ASTNode rootNode) throws Exception {
+	/**
+	 * takes a rootNode representing an AST and returns a human understandable string representing it
+	 * @param rootNode - the AST
+	 * @return the string representing the AST
+	 */
+  public static String FormatAST(ASTNode rootNode) {
 
     String finalString = new String();
 
@@ -73,7 +82,7 @@ public class ASTFormatter {
 
     // when we go back up a node
     // we need to know where we are to find the next child node in order
-    ArrayList<Integer> indexTracker = new ArrayList<Integer>();
+    Stack<Integer> indexTracker = new Stack<Integer>();
     int currentChildIndex = 0;
     int currentChildSize;
 
@@ -90,19 +99,14 @@ public class ASTFormatter {
           break;
         }
 
-        // What?? throw error not possible
-        if (currentNode.parent == null) {
-          throw new Exception("Need to go up the the AST, but no parent");
-        }
+				assert currentNode.parent != null : "iterating up but no parent";
 
         currentNode = currentNode.parent;
 
         // Oh god why doesn't java have a pop method
         // what is this, every language since 1999
         // has had a way for arrays to represent stacks
-        int lastIndex = indexTracker.size() - 1;
-        currentChildIndex = indexTracker.get(lastIndex);
-        indexTracker.remove(lastIndex);
+        currentChildIndex = indexTracker.pop();
 
         continue;
 
@@ -111,11 +115,9 @@ public class ASTFormatter {
         currentNode = currentNode.child.get(currentChildIndex);
         currentChildIndex += 1;
 
-        if (currentNode == null) {
-          throw new Exception("Child node in array but not real value");
-        }
+				assert currentNode != null : "currentNode is null";
 
-        indexTracker.add(currentChildIndex);
+        indexTracker.push(currentChildIndex);
         currentChildIndex = 0;
 
         String currentLine = new String(new char[indexTracker.size()]).replace("\0", "\t");
