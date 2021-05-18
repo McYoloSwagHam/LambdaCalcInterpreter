@@ -7,6 +7,11 @@ import java.util.*;
 public class Evaluator {
 
 	/**
+	 * debug printing/ verbosity 
+	 */
+	boolean isVerbose;
+
+	/**
 	 * ApplyToNewTree is a function that reduces and applies substituion to a subtree
 	 *
 	 * @param replaceNode - this is the copy of the original tree that we will edit while iterating
@@ -414,10 +419,11 @@ public class Evaluator {
   }
 
 	/**
-	 * Empty init.
+	 * just adds 
+	 * @param isVerbose - should print extra information?
 	 */
-  public Evaluator() {
-    
+  public Evaluator(boolean isVerbose) {
+		this.isVerbose = isVerbose;
   }
 
 }

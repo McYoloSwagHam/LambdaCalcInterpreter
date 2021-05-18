@@ -12,30 +12,37 @@ import java.util.*;
  */
 public class main {
 
+
+
   /**
    * Main...
+	 * @param args - "-v" for AST printing
    */
   public static void main(String[] args) {
     // initialise instance variables
 
-    Scanner scan = new Scanner(System.in);
-    //String userInput = scan.nextLine();
-    //String userInput = "(\\f.\\x.(f (f (f (f (f x))))))(\\a.\\b.\\c.(b (a b c)))(\\f.\\x.(f (f x)))";
-    //String userInput = "(a ((\\b.\\c.(b (\\f.\\x.(f (f x))) b c))))";
-    //String userInput = "(a ((\\b.\\c.(b (b c)(b c)))))";
-    //String userInput = "(\\a.\\b.\\f.(a (b f)))(\\f.\\x.(f (f x)))(\\f.\\x.(f (f (f x))))";
-    //String userInput = "(\\x.\\y.(x (y (\\a.\\b.\\c.(b (a b c))) (\\d.\\p.(d p)))))(\\f.\\x.(e (e l)))(\\f.\\x.(f x))";
-    //String userInput = "(\\b.\\e.(e b))(\\f.\\x.(f (f (f x))))(\\f.\\d.(f (f d)))";
+		boolean isVerbose = false;
 
-    String userInput = "(\\n.\\f.\\x.(n (\\g.\\h.(h (g f))) (\\u.(x)) (\\u.(u)) ))(\\e.\\l.(e (e (e l))))";
+		for (String arg : args) {
+			if (arg.equals("-v")) {
+				isVerbose = true;
+			}
+		}
+
+		System.out.println("Enter your lambda expression: ");
+    Scanner scan = new Scanner(System.in);
+    String userInput = scan.nextLine();
 
     try {
 
       LexicalParser lexer = new LexicalParser(userInput);
-      Evaluator eval = new Evaluator();
+      Evaluator eval = new Evaluator(isVerbose);
       ASTNode reduced = lexer.rootNode;
       
-      System.out.println("lexer : " + ASTFormatter.FormatAST(lexer.rootNode));
+			if (isVerbose == true) {
+				System.out.println("lexer : " + ASTFormatter.FormatAST(lexer.rootNode));
+			}
+
 
       ArrayList<Integer> ASTHashes = new ArrayList<Integer>();
       ArrayList<ASTNode> ASTs = new ArrayList<ASTNode>();
@@ -60,12 +67,17 @@ public class main {
 
 
         ASTHashes.add(currentHash);
-				String hashCheck = String.format("currentHash AST (%d)", currentHash);
-				System.out.println(hashCheck);
-        System.out.println(ASTFormatter.FormatAST(reduced));
+
+				if (isVerbose) {
+					String hashCheck = String.format("currentHash AST (%d)", currentHash);
+					System.out.println(hashCheck);
+					System.out.println(ASTFormatter.FormatAST(reduced));
+				}
+
       }
 
       System.out.println("Final Reduction!");
+      System.out.println(ASTFormatter.FormatASTAsLambda(reduced));
 
     } catch (Exception err) {
       err.printStackTrace();

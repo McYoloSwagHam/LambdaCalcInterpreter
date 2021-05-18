@@ -1,3 +1,0 @@
-enum Term {
-	ABSTRACTION, APPLICATION
-}

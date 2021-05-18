@@ -132,4 +132,106 @@ public class ASTFormatter {
     return finalString;
 
   }
+
+
+	/**
+	 * prints AST as a lambda expression
+	 * @param rootNode - the AST to convert into a lambda
+	 * @return the AST in lambda form
+	 */
+	public static String FormatASTAsLambda(ASTNode rootNode) {
+
+		String finalString = new String();
+		boolean lastGoneUp = false;
+		ASTNode currentNode = rootNode;
+		Stack<Integer> indexTracker = new Stack<Integer>();
+		int currentIndex = 0;
+
+    while (true) {
+
+      // go up or exit
+      if (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) {
+        // exit
+        if (indexTracker.empty()) {
+					finalString += ")";
+          break;
+        }
+
+				assert currentNode.parent != null : "currentNode.parent null";
+
+				if (currentNode.functionType == FunctionType.NESTED_FUNCTION) {
+					finalString += ")";
+				}
+
+
+        currentNode = currentNode.parent;
+
+
+				if (lastGoneUp == true) {
+					finalString += ")";
+				}
+
+				lastGoneUp = true;
+
+        currentIndex = indexTracker.pop();
+
+
+
+        continue;
+
+      } else {
+
+        // if we haven't found are first abstraction, it's definitely gonna be
+        // part of the tree.
+
+
+        currentNode = currentNode.child.get(currentIndex);
+
+				if (currentIndex == 0) {
+					finalString += "(";
+				}
+
+
+        indexTracker.push(++currentIndex);
+        currentIndex = 0;
+
+				assert currentNode != null : "currentNode null";
+
+				lastGoneUp = false;
+
+				switch (currentNode.functionType) {
+					case NESTED_FUNCTION:
+						int childAge = indexTracker.pop();
+
+						if (childAge != 0) {
+							finalString += "(";
+						}
+
+						indexTracker.push(childAge);
+
+						for (String local : currentNode.locals) {
+							finalString += "\\";
+							finalString += local;
+							finalString += ".";
+						}
+						break;
+					case FUNCTION_CALL:
+						for (String call : currentNode.functionCalls) {
+							finalString += call + " ";
+						}
+						break;
+					case NONE:
+						break;
+
+				}
+
+				
+      }
+    }
+
+		return finalString;
+
+	}
+
+
 }
