@@ -14,8 +14,16 @@ javac *.java && java main -v
 
 To use this just paste in a lambda calc expression or type it in, look at some of the examples below.
 
-
 or in BlueJ, Project -> Create Jar File... use main as the main class.
+
+or  with maven
+```
+mvn package
+```
+then to run the jar
+```
+java -jar LambdaCalc... .jar -V
+```
 
 ## Fun lambda expressions with church numerals
 

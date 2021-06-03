@@ -14,4 +14,4 @@
 
 ## 31st of May: Contacted Mr. Hauswirth asking for the exception (Maybe too late), should've actually contacted way earlier
 
-## 3rd of May: cleaning things up for project, need to add Maven for code style check.
+## 3rd of June: cleaning things up for project, need to add Maven for code style check, didn't manage to get all the checkstyle stuff done, did manage to get it google-java-format ready though.

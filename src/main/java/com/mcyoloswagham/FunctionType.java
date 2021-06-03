@@ -1,3 +1,4 @@
+package com.mcyoloswagham;
 
 enum FunctionType {
     NONE, NESTED_FUNCTION, FUNCTION_CALL,
