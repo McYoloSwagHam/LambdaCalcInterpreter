@@ -1,18 +1,17 @@
 #BlueJ class context
 comment0.target=Evaluator
-comment0.text=\r\n\ Iteratively\ reduce\ the\ expression\ tree,\ substituting\ the\ relevant\ functions\r\n\ \r\n\ @author\ (your\ name)\r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
-comment1.params=replacePoint\ currentNode\ values
+comment0.text=\r\n\ Iteratively\ reduce\ the\ expression\ tree,\ substituting\ the\ relevant\ functions\r\n\ and\ reducing\ and\ cleaning\ the\ AST,\ removing\ empty\ brackets\ (Null\ Nodes)\r\n
+comment1.params=replaceNode\ currentNode\ values
 comment1.target=void\ ApplyToNewTree(ASTNode,\ ASTNode,\ java.util.HashMap)
-comment1.text=\r\n\ Constructor\ for\ objects\ of\ class\ evaluator\r\n
+comment1.text=\r\n\ ApplyToNewTree\ is\ a\ function\ that\ reduces\ and\ applies\ substituion\ to\ a\ subtree\r\n\r\n\ @param\ replaceNode\ -\ this\ is\ the\ copy\ of\ the\ original\ tree\ that\ we\ will\ edit\ while\ iterating\r\n\ @param\ currentNode\ -\ this\ is\ the\ original\ tree\ that\ we\ won't\ edit,\ we\ pass\ it\ because\ it's\ easier\r\n\ to\ iterate\ it,\ becase\ we\ don't\ edit\ it\r\n\ @param\ values\ -\ values\ is\ a\ hashmap\ of\ function\ calls,\ to\ substitute\ function\ calls\ with\ their\ relevant\r\n\ nodes\r\n
 comment2.params=node
 comment2.target=ASTNode\ Reduce(ASTNode)
 comment3.params=rootNode
 comment3.target=void\ CleanAST(ASTNode)
 comment4.params=rootNode
 comment4.target=ASTNode\ Evaluate(ASTNode)
-comment5.params=rootNode
-comment5.target=Evaluator(ASTNode)
-comment6.params=y
-comment6.target=int\ sampleMethod(int)
-comment6.text=\r\n\ An\ example\ of\ a\ method\ -\ replace\ this\ comment\ with\ your\ own\r\n\r\n\ @param\ \ y\ \ a\ sample\ parameter\ for\ a\ method\r\n\ @return\ \ \ \ the\ sum\ of\ x\ and\ y\r\n
-numComments=7
+comment4.text=\r\n\ reduces\ a\ given\ AST\ and\ cleans\ it\r\n\ @param\ rootNode\ -\ the\ AST\ to\ evaluate\r\n\ @return\ a\ new\ reduced\ and\ cleaned\ tree,\ it\ is\ a\ copy\ of\ the\ input\ tree\r\n
+comment5.params=isVerbose
+comment5.target=Evaluator(boolean)
+comment5.text=\r\n\ just\ adds\ \r\n\ @param\ isVerbose\ -\ should\ print\ extra\ information?\r\n
+numComments=6

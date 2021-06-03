@@ -6,47 +6,47 @@ import java.util.*;
  */
 public class LexicalParser {
 
-	/**
-	 * This is the parsed AST of the user input
-	 */
+    /**
+     * This is the parsed AST of the user input
+     */
   public ASTNode rootNode;
 
-	/**
-	 * these are special characters in lambda expressions
-	 * described by a Set
-	 */
+    /**
+     * these are special characters in lambda expressions
+     * described by a Set
+     */
   public Set<Character> specialCharacters;
 
 
-	/**
-	 * this is a set of characters that determine valid closing charcters.
-	 * used in IsInvalidClosing
-	 */
+    /**
+     * this is a set of characters that determine valid closing charcters.
+     * used in IsInvalidClosing
+     */
   public ArrayList<Character> validClosingCharacters;
 
 
-	/**
-	 * Check is a character is a special character
-	 * @param symbol - the character to be checked
-	 */
+    /**
+     * Check is a character is a special character
+     * @param symbol - the character to be checked
+     */
   public boolean IsSpecialCharacter(char symbol) {
     return specialCharacters.contains(symbol);
   }
 
-	/**
-	 * Checks if a character is an Invalid closing
-	 * @param lastChar - the character to be checked
-	 */
+    /**
+     * Checks if a character is an Invalid closing
+     * @param lastChar - the character to be checked
+     */
   public boolean IsInvalidClosing(char lastChar) {
     return validClosingCharacters.contains(lastChar);
   }
 
-	/**
-	 * This is the method that turns the lambda expression into an AST. 
-	 * @param lambdaExpression the user input string
-	 * @throws LexerError If the input is not a valid lambda calculus
-	 *  expression
-	 */
+    /**
+     * This is the method that turns the lambda expression into an AST. 
+     * @param lambdaExpression the user input string
+     * @throws LexerError If the input is not a valid lambda calculus
+     *  expression
+     */
   public void Tokenize(String lambdaExpression) throws LexerError {
 
     int ExprRefCount = 0;
@@ -226,11 +226,11 @@ public class LexicalParser {
 
   }
 
-	/**
-	 * Construct for lexicalParser, it initializes the special characters and 
-	 * calls Tokenize. 
-	 * @param lambdaExpression - user input
-	 */ 
+    /**
+     * Construct for lexicalParser, it initializes the special characters and 
+     * calls Tokenize. 
+     * @param lambdaExpression - user input
+     */ 
   public LexicalParser(String lambdaExpression) throws LexerError {
     // initialise instance variables
     rootNode = new ASTNode();

@@ -16,20 +16,20 @@ public class main {
 
   /**
    * Main...
-	 * @param args - "-v" for AST printing
+     * @param args - "-v" for AST printing
    */
   public static void main(String[] args) {
     // initialise instance variables
 
-		boolean isVerbose = false;
+        boolean isVerbose = false;
 
-		for (String arg : args) {
-			if (arg.equals("-v")) {
-				isVerbose = true;
-			}
-		}
+        for (String arg : args) {
+            if (arg.equals("-v")) {
+                isVerbose = true;
+            }
+        }
 
-		System.out.println("Enter your lambda expression: ");
+        System.out.println("Enter your lambda expression: ");
     Scanner scan = new Scanner(System.in);
     String userInput = scan.nextLine();
 
@@ -39,9 +39,9 @@ public class main {
       Evaluator eval = new Evaluator(isVerbose);
       ASTNode reduced = lexer.rootNode;
       
-			if (isVerbose == true) {
-				System.out.println("lexer : " + ASTFormatter.FormatAST(lexer.rootNode));
-			}
+            if (isVerbose == true) {
+                System.out.println("lexer : " + ASTFormatter.FormatAST(lexer.rootNode));
+            }
 
 
       ArrayList<Integer> ASTHashes = new ArrayList<Integer>();
@@ -56,23 +56,23 @@ public class main {
         reduced = eval.Evaluate(reduced);
         currentHash = ASTNode.HashAST(reduced);
 
-				// If we've seen the hash before
-				// then we know that it's recursive since the has will always result in this hash again
-				// making it cyclically infinite.
-				if (ASTHashes.contains(currentHash)) {
-					System.out.println("ASTHashes : " + ASTHashes);
-					System.out.println("CurrentHash (" + currentHash + ") previously seen before!");
-					break;
-				}
+                // If we've seen the hash before
+                // then we know that it's recursive since the has will always result in this hash again
+                // making it cyclically infinite.
+                if (ASTHashes.contains(currentHash)) {
+                    System.out.println("ASTHashes : " + ASTHashes);
+                    System.out.println("CurrentHash (" + currentHash + ") previously seen before!");
+                    break;
+                }
 
 
         ASTHashes.add(currentHash);
 
-				if (isVerbose) {
-					String hashCheck = String.format("currentHash AST (%d)", currentHash);
-					System.out.println(hashCheck);
-					System.out.println(ASTFormatter.FormatAST(reduced));
-				}
+                if (isVerbose) {
+                    String hashCheck = String.format("currentHash AST (%d)", currentHash);
+                    System.out.println(hashCheck);
+                    System.out.println(ASTFormatter.FormatAST(reduced));
+                }
 
       }
 

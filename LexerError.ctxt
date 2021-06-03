@@ -1,5 +1,7 @@
 #BlueJ class context
 comment0.target=LexerError
+comment0.text=\r\n\ LexerError\ represents\ in\ an\ invalid\ parser\ error\r\n
 comment1.params=errorMessage
 comment1.target=LexerError(java.lang.String)
+comment1.text=\r\n\ constructor\ for\ the\ lexer\ error\r\n\ @param\ errorMessage\ -\ the\ lexer\ error\ string\r\n
 numComments=2

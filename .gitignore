@@ -1,0 +1,6 @@
+*.class
+*.ctxt
+*.log
+log/
+target/
+.DS_Store

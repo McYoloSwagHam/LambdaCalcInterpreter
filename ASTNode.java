@@ -20,53 +20,53 @@ import java.util.*;
  */
 public class ASTNode {
 
-	/**
-	 * if the function is an abstraction
-	 * these are the locals
-	 */
+    /**
+     * if the function is an abstraction
+     * these are the locals
+     */
   public ArrayList<String> locals;
 
 
-	/**
-	 * if the function is an application
-	 * these are the function calls
-	 */
+    /**
+     * if the function is an application
+     * these are the function calls
+     */
   public ArrayList<String> functionCalls;
 
-	/**
-	 * for rolling hash purposes
-	 */
+    /**
+     * for rolling hash purposes
+     */
   public static final int PRIME_BASE = 65537;
 
-	/**
-	 * the parent of this node
-	 */
+    /**
+     * the parent of this node
+     */
   public ASTNode parent;
 
-	/**
-	 * the children of this node
-	 */
+    /**
+     * the children of this node
+     */
   public ArrayList<ASTNode> child;
 
-	/**
-	 * how far down the the node is in the tree
-	 * used only for decorative purposes (printing)
-	 */
+    /**
+     * how far down the the node is in the tree
+     * used only for decorative purposes (printing)
+     */
   public int lexicalDepth;
 
-	/**
-	 * what type of node is this
-	 */
+    /**
+     * what type of node is this
+     */
   public FunctionType functionType;
 
-	/**
-	 * this is my implementation of a dumb rolling hash that is
-	 * meant to be unique, obviously doesn't have a gread period,
-	 * could be its own class but it's way too small
-	 * @param hash - basically a this pointer
-	 * @param info - the hash info that changes this rolling hash
-	 * @return the new rolling hash
-	 */
+    /**
+     * this is my implementation of a dumb rolling hash that is
+     * meant to be unique, obviously doesn't have a gread period,
+     * could be its own class but it's way too small
+     * @param hash - basically a this pointer
+     * @param info - the hash info that changes this rolling hash
+     * @return the new rolling hash
+     */
   public static int RollingHash(int hash, int info) {
     hash *= PRIME_BASE;
     hash ^= info;
@@ -74,9 +74,9 @@ public class ASTNode {
     return hash;
   }
 
-	/**
-	 * this function moves a node up a level.
-	 */
+    /**
+     * this function moves a node up a level.
+     */
   public void Upgrade() {
 
     //Remove this from parent
@@ -86,11 +86,11 @@ public class ASTNode {
     this.lexicalDepth -= 1;
   }
 
-	/**
-	 * this function Hashes the AST starting from the rootNode
-	 * @param rootNode - the AST
-	 * @return the hash of the AST represented as an integer.
-	 */
+    /**
+     * this function Hashes the AST starting from the rootNode
+     * @param rootNode - the AST
+     * @return the hash of the AST represented as an integer.
+     */
   public static int HashAST(ASTNode rootNode) {
 
     ASTNode currentNode = rootNode;
@@ -173,19 +173,19 @@ public class ASTNode {
 
   }
 
-	/** 
-	 * checks if a node has children
-	 * @return true if this node has childre otherwise false
-	 */
+    /** 
+     * checks if a node has children
+     * @return true if this node has childre otherwise false
+     */
   public boolean hasChildren() {
     return child.size() != 0;
   }
 
-	/**
-	 * CloneSubTree literally recursively copies the tree of a node starting a sourceNode
-	 * to the currentNode, it is a graphic substition
-	 * @param sourceNode - the node to copy the tree from
-	 */
+    /**
+     * CloneSubTree literally recursively copies the tree of a node starting a sourceNode
+     * to the currentNode, it is a graphic substition
+     * @param sourceNode - the node to copy the tree from
+     */
   public void CloneSubTree(ASTNode sourceNode) {
 
     ASTNode newNode = this;
@@ -237,12 +237,12 @@ public class ASTNode {
 
   }
 
-	/**
-	 * this function copys the properties of the node from one node to another
-	 * but it does not copy the graphical portions (parents/children)
-	 * @param sourceNode - the source node to copy from
-	 * @param targetNode - the target node to copy to
-	 */
+    /**
+     * this function copys the properties of the node from one node to another
+     * but it does not copy the graphical portions (parents/children)
+     * @param sourceNode - the source node to copy from
+     * @param targetNode - the target node to copy to
+     */
   public static void CloneNode(ASTNode sourceNode, ASTNode targetNode) {
     targetNode.functionType = sourceNode.functionType;
     targetNode.lexicalDepth = sourceNode.lexicalDepth;
@@ -265,10 +265,10 @@ public class ASTNode {
 
   }
 
-	/**
-	 * this constructor makes a new astnode, and links it to a parent
-	 * @param nodeParent - the to be parent of this node
-	 */
+    /**
+     * this constructor makes a new astnode, and links it to a parent
+     * @param nodeParent - the to be parent of this node
+     */
   public ASTNode(ASTNode nodeParent) {
 
     locals = new ArrayList<String>();
@@ -280,9 +280,9 @@ public class ASTNode {
 
   }
 
-	/**
-	 * this constructor makes a empty new node assigned as a NONE type
-	 */
+    /**
+     * this constructor makes a empty new node assigned as a NONE type
+     */
   public ASTNode() {
 
     locals = new ArrayList<String>();

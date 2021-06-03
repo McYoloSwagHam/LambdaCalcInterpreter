@@ -1,10 +1,7 @@
 #BlueJ class context
 comment0.target=main
-comment0.text=\r\n\ Write\ a\ description\ of\ class\ main\ here.\r\n\r\n\ @author\ (your\ name)\r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
+comment0.text=\r\n\ This\ is\ the\ main\ class,\ where\ program\ execution\ starts.\r\n\ it\ gets\ an\ input\ from\ the\ user\ and\ then\ passes\ it\ to\ LexicalParser\r\n\ it\ then\ reduces\ until\ the\ hash\ is\ equivalent\ to\ the\ last\r\n\ TODO\:\ make\ an\ ArrayList\ of\ hashes,\ and\ check\ since\ recursive\ processes\r\n\ \ might\ have\ multiple\ steps\ instead\ of\ being\ 1\ step\ reductions.\r\n\r\n\ @author\ Ayaz\ Mammadov\r\n\ @version\ 1.0.0\r\n
 comment1.params=args
 comment1.target=void\ main(java.lang.String[])
-comment1.text=\r\n\ Constructor\ for\ objects\ of\ class\ main\r\n
-comment2.params=y
-comment2.target=int\ sampleMethod(int)
-comment2.text=\r\n\ An\ example\ of\ a\ method\ -\ replace\ this\ comment\ with\ your\ own\r\n\r\n\ @param\ \ y\ \ a\ sample\ parameter\ for\ a\ method\r\n\ @return\ \ \ \ the\ sum\ of\ x\ and\ y\r\n
-numComments=3
+comment1.text=\r\n\ Main...\r\n\ @param\ args\ -\ "-v"\ for\ AST\ printing\r\n
+numComments=2
