@@ -185,18 +185,7 @@ public class Evaluator {
       return newTree;
     }
 
-    // Fuck my life why do I have to write a language that has no tail call
-    // optimization
-    // my fucking life would be 1000x if I could do this with tailcalls, but I feel
-    // bad
-    // because I have no idea if some poor fucker inputs a 200000 line long lambda
-    // calculus
-    // it's going to fucking explode
-
-    // Fuck my life, a tree is only reducable when it's on a layer of its own
-    // and there are multiple siblings and the oldest sibling (child[0]) is an
-    // abstraction
-    // e.g.
+   
     // (a (\y.(y)) b) - NOT reducable
     // (a ((\y.(y)) b)) = a b - reducable
 
