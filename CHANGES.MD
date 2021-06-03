@@ -1,6 +1,8 @@
 
 # Changes & Timeline
 
+## lol.txt contains some of my working with ASTs & though mostly mental scribbles
+
 ## First commit 8th may
 
 ## 11th of May: basic interpreter was working, with AST hashing
