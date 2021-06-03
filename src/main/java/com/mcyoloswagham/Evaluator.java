@@ -5,6 +5,7 @@ import java.util.*;
 /**
  * Iteratively reduce the expression tree, substituting the relevant functions
  * and reducing and cleaning the AST, removing empty brackets (Null Nodes)
+ * @author Ayaz Mammadov
  */
 public class Evaluator {
 

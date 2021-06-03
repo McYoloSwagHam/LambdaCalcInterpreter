@@ -5,6 +5,7 @@ import java.util.Stack;
 /**
  * this class is just there for debugging and formatting it's only purpose it to
  * turn an AST tree into a string form for printing.
+ * @author Ayaz Mammadov
  */
 public final class ASTFormatter {
 

@@ -19,6 +19,7 @@ import java.util.Stack;
  * childs, it can either be a none (representing empty brackets),
  * NESTED_FUNCTION (representing an abstraction) FUNCTION_CALL (represneting an
  * application)
+ * @author Ayaz Mammadov
  */
 public class ASTNode {
 

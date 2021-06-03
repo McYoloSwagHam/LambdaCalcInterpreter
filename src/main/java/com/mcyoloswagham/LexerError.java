@@ -1,6 +1,7 @@
 package com.mcyoloswagham;
 /**
  * LexerError represents in an invalid parser error
+ * @author Ayaz Mammadov
  */
 public class LexerError extends Exception {
 

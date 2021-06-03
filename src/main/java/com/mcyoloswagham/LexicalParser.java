@@ -4,6 +4,7 @@ import java.util.*;
 
 /**
  * LexicalParser is responsible for turning user input into an initial AST
+ * @author Ayaz Mammadov
  */
 public class LexicalParser {
 
