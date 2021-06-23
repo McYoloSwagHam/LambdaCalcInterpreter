@@ -82,61 +82,24 @@ public final class ASTFormatter {
   public static String FormatAST(ASTNode rootNode) {
 
     String finalString = new String();
-
+		
     // Java doesn't have Tail Call optimization
     // which means we're gonna have to do this iteratively
     // if we don't want to stack overflow. :(
 
-    ASTNode currentNode = rootNode;
+		ASTIterator ASTIter = rootNode.iterator();
+    int i = 0;
+		while (ASTIter.hasNext()) {
+      
+			ASTNode currentNode = ASTIter.next();
 
-    // when we go back up a node
-    // we need to know where we are to find the next child node in order
-    Stack<Integer> indexTracker = new Stack<Integer>();
-    int currentChildIndex = 0;
-    int currentChildSize;
+			String currentLine = new String(new char[ASTIter.getDepth()]).replace("\0", "\t");
 
-    finalString += FormatNode(currentNode) + "\n";
+			currentLine += FormatNode(currentNode);
 
-    while (true) {
+			finalString += currentLine + "\n";
 
-      currentChildSize = currentNode.child.size();
-
-      if (currentChildSize == 0 || currentChildIndex == currentChildSize) {
-
-        // exit
-        if (indexTracker.size() == 0) {
-          break;
-        }
-
-        assert currentNode.parent != null : "iterating up but no parent";
-
-        currentNode = currentNode.parent;
-
-        // Oh god why doesn't java have a pop method
-        // what is this, every language since 1999
-        // has had a way for arrays to represent stacks
-        currentChildIndex = indexTracker.pop();
-
-        continue;
-
-      } else {
-
-        currentNode = currentNode.child.get(currentChildIndex);
-        currentChildIndex += 1;
-
-        assert currentNode != null : "currentNode is null";
-
-        indexTracker.push(currentChildIndex);
-        currentChildIndex = 0;
-
-        String currentLine = new String(new char[indexTracker.size()]).replace("\0", "\t");
-
-        currentLine += FormatNode(currentNode);
-
-        finalString += currentLine + "\n";
-
-      }
-    }
+		}
 
     return finalString;
 

@@ -2,6 +2,7 @@ package com.mcyoloswagham;
 
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.Iterator;
 
 /*
  * The Abstract Syntax Tree will not be a binary tree of Operations
@@ -14,6 +15,95 @@ import java.util.Stack;
  * E.G
  */
 
+
+class ASTIterator implements Iterator<ASTNode> {
+
+	ASTNode currentNode;
+	Stack<Integer> indexTracker;
+	int currentIndex;
+
+	public ASTIterator(ASTNode root) {
+		currentNode = root;
+		indexTracker = new Stack<Integer>();
+		currentIndex = 0;
+	}
+
+
+	public void GoUp() {
+			currentNode = currentNode.parent;
+			currentIndex = indexTracker.pop();
+	}
+
+	public void GoDown() {
+			currentNode = currentNode.child.get(currentIndex);
+			indexTracker.push(++currentIndex);
+			currentIndex = 0;
+	}
+
+	public void remove()
+	{
+			throw new UnsupportedOperationException();
+	}
+
+	public ASTNode next() {
+
+		while (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) {
+			GoUp();
+		} 
+
+		GoDown();
+		return currentNode;
+
+	}
+
+	public int getDepth() {
+		return indexTracker.size();
+	}
+
+
+	public boolean hasNext() {
+
+		boolean isEmpty = indexTracker.empty();
+
+		if (!currentNode.hasChildren() || currentIndex == currentNode.child.size()) {
+
+      //Are we bottom right?
+      ASTNode tmpNode = currentNode;
+      int idx = indexTracker.size() - 1;
+      boolean isLast = true;
+
+      for (; idx >= 0; idx--) {
+        tmpNode = tmpNode.parent;
+
+        if (tmpNode == null) {
+          break;
+        }
+
+        if (tmpNode.child.size() != indexTracker.get(idx)) {
+          isLast = false; 
+          break;
+        }
+
+      }
+
+      if (isLast) {
+        return false;
+      }
+
+      if (isEmpty) {
+        return false;
+      }
+		}
+
+		return true;
+
+	}
+
+
+
+}
+
+
 /**
  * ASTNode is the class that reprents a node in an AST, it has 1 parent and many
  * childs, it can either be a none (representing empty brackets),
@@ -21,7 +111,7 @@ import java.util.Stack;
  * application)
  * @author Ayaz Mammadov
  */
-public class ASTNode {
+public class ASTNode implements Iterable<ASTNode> {
 
   /**
    * if the function is an abstraction these are the locals
@@ -74,6 +164,11 @@ public class ASTNode {
     hash += info % 2;
     return hash;
   }
+
+	public ASTIterator iterator() {
+		return new ASTIterator(this);
+	}
+
 
   /**
    * this function moves a node up a level.

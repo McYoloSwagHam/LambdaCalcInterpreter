@@ -24,7 +24,7 @@ public class main {
   public static void main(String[] args) {
     // initialise instance variables
 
-    boolean isVerbose = false;
+    boolean isVerbose = true;
 
     for (String arg : args) {
       if (arg.equals("-v")) {
